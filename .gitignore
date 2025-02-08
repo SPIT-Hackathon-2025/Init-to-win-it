@@ -11,3 +11,6 @@ Asim/notion/.env
 Asim/notion/.composio.lock
 Asim/notion/data.py
 Asim/notion/notion_mock_tasks.csv
+Asim/notion/analysis_results.json
+Asim/notion/app.log
+Asim/notion/templates/
