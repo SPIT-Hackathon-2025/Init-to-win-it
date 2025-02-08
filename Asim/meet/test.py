@@ -9,10 +9,12 @@ import pytz
 from dotenv import load_dotenv
 import re
 from pymongo import MongoClient
+from flask_cors import CORS  # Add this import
 
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
 # MongoDB connection setup

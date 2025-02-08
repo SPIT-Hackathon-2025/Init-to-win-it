@@ -88,41 +88,120 @@ const Dashboard = () => {
     if (!outputText) return [];
     
     // Split by numbered events and filter out non-event text
-    const events = outputText.split(/\d+\.\s+\*\*/).filter(str => str.includes('**'));
+    const eventStrings = outputText.split(/\d+\.\s+(?:\*\*)?/).filter(str => 
+      str && !str.startsWith('Found') && !str.startsWith('Here') && !str.includes('Feel free')
+    );
     
-    return events.map(eventStr => {
-      const lines = eventStr.split('\n');
-      const title = lines[0].replace(/\*\*/g, '').trim();
+    return eventStrings.map(eventStr => {
+      const lines = eventStr.split('\n').map(line => line.trim()).filter(Boolean);
       const details = {};
       
-      // Parse each line for details
-      lines.slice(1).forEach(line => {
-        const cleanLine = line.replace(/^\s*-\s*/, '').replace(/\*\*/g, '');
+      // Extract title from first line
+      const title = lines[0].replace(/\*\*/g, '').trim();
+      
+      // Function to find and extract meeting links
+      const findMeetLinks = (text) => {
+        const meetLinkRegex = /\[.*?\]\((https:\/\/meet\.google\.com\/[a-z-]+)\)/gi;
+        const directMeetLinkRegex = /(https:\/\/meet\.google\.com\/[a-z-]+)/gi;
         
-        if (cleanLine.includes('Date and Time:')) {
-          const [date, time] = cleanLine.split('Date and Time:')[1].split(',').map(s => s.trim());
-          details.date = date;
-          details.time = time.split('(')[0].trim();
-          details.timezone = time.match(/\((.*?)\)/)?.[1] || '';
+        const matches = [
+          ...(text.match(meetLinkRegex) || []).map(link => link.match(/\((.*?)\)/)[1]),
+          ...(text.match(directMeetLinkRegex) || [])
+        ];
+        
+        return matches[0]; // Return the first valid meet link found
+      };
+
+      // Process each line for details
+      lines.slice(1).forEach(line => {
+        const cleanLine = line.replace(/^\s*-\s*|\*\*/g, '').trim();
+        
+        // Check for meet links in the current line
+        const meetLink = findMeetLinks(line);
+        if (meetLink) {
+          details.meetLink = meetLink;
         }
-        else if (cleanLine.includes('Attendees:')) {
-          details.attendees = cleanLine.split('Attendees:')[1].trim();
+        
+        // Extract other details
+        if (cleanLine.includes('Date:')) {
+          details.date = cleanLine.split('Date:')[1].trim();
+        }
+        else if (cleanLine.includes('Time:')) {
+          details.time = cleanLine.split('Time:')[1].trim();
         }
         else if (cleanLine.includes('Location:')) {
           details.location = cleanLine.split('Location:')[1].trim();
         }
-        else if (cleanLine.includes('Join Meeting')) {
-          const meetLink = cleanLine.match(/\((https:\/\/.*?)\)/)?.[1];
-          if (meetLink) details.meetLink = meetLink;
+        else if (cleanLine.includes('Attendees:')) {
+          details.attendees = cleanLine.split('Attendees:')[1].trim();
+        }
+        // Additional date/time format handling
+        else if (cleanLine.includes('Date and Time:')) {
+          const [date, time] = cleanLine.split('Date and Time:')[1].split(',').map(s => s.trim());
+          details.date = date;
+          details.time = time.split('(')[0].trim();
+          if (time.includes('(')) {
+            details.timezone = time.match(/\((.*?)\)/)[1];
+          }
         }
       });
 
       return {
         title,
-        ...details
+        ...details,
+        // Ensure we have date and time in some form
+        date: details.date || 'Date not specified',
+        time: details.time || 'Time not specified',
       };
     });
   };
+
+  const renderEventCard = (event, index) => (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      key={index}
+      className="p-4 rounded-lg bg-yellow-400/5 border border-yellow-400/10 
+        hover:border-yellow-400/30 transition-colors"
+    >
+      <h3 className="text-yellow-100 font-medium mb-2">{event.title}</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="text-yellow-400/60 space-y-2">
+          <p className="flex items-center gap-2">
+            <span>📅</span> {event.date}
+          </p>
+          <p className="flex items-center gap-2">
+            <span>⏰</span> {event.time}
+          </p>
+          {event.location && (
+            <p className="flex items-center gap-2">
+              <span>📍</span> {event.location}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col justify-between text-yellow-400/60 space-y-2">
+          {event.attendees && (
+            <p className="flex items-center gap-2">
+              <span>👥</span> {event.attendees}
+            </p>
+          )}
+          {event.meetLink && (
+            <a
+              href={event.meetLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 
+                bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-400 
+                rounded-md transition-colors"
+            >
+              <span>💻</span> Join Meeting
+            </a>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
 
   const renderScheduleSection = () => (
     <motion.div
@@ -154,57 +233,7 @@ const Dashboard = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {events.map((event, index) => (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              key={index}
-              className="p-4 rounded-lg bg-yellow-400/5 border border-yellow-400/10 
-                hover:border-yellow-400/30 transition-colors"
-            >
-              <h3 className="text-yellow-100 font-medium mb-2">{event.title}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="text-yellow-400/60 space-y-2">
-                  <p className="flex items-center gap-2">
-                    <span>📅</span> {event.date}
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <span>⏰</span> {event.time}
-                  </p>
-                  {event.timezone && (
-                    <p className="flex items-center gap-2">
-                      <span>🌍</span> {event.timezone}
-                    </p>
-                  )}
-                  {event.location && (
-                    <p className="flex items-center gap-2">
-                      <span>📍</span> {event.location}
-                    </p>
-                  )}
-                </div>
-                <div className="text-yellow-400/60 space-y-2">
-                  {event.attendees && (
-                    <p className="flex items-center gap-2">
-                      <span>👥</span> {event.attendees}
-                    </p>
-                  )}
-                  {event.meetLink && (
-                    <a
-                      href={event.meetLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 mt-2 px-4 py-2 
-                        bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-400 
-                        rounded-md transition-colors"
-                    >
-                      <span>💻</span> Join Meeting
-                    </a>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
+          {events.map((event, index) => renderEventCard(event, index))}
           {events.length === 0 && !eventsLoading && (
             <p className="text-center text-yellow-400/60 py-8">No upcoming events</p>
           )}

@@ -27,6 +27,13 @@ const MainLayout = () => {
       label: 'Live Logs',
       emoji: '📝',
       description: 'Real-time logs and messages',
+    },
+    {
+      path: '/calender',
+      icon: FaUsers,
+      label: 'Calender Agent',
+      emoji: '📅',
+      description: 'Schedule and manage meetings',
     }
   ];
 
