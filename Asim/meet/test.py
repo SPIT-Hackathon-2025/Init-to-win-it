@@ -47,84 +47,111 @@ Current Context:
         enhanced_prompt = f"""
 {time_context}
 
-I am your AI Meeting Assistant, capable of handling all aspects of Google Meet management and email communications. I will help you with: {user_prompt}
+I am your AI Meeting Assistant with access to Google Meet, Google Calendar, and Gmail. I will help you with: {user_prompt}
 
-I will follow these comprehensive steps:
+I understand these types of requests:
+
+A. CALENDAR AND FREE SLOT ANALYSIS:
+   Command: "CHECK_FREE_SLOTS"
+   - I will use GOOGLECALENDAR_FIND_FREE_SLOTS to check availability
+   - View all available time slots for specified participants
+   - Get optimal meeting times across multiple calendars
+   - See conflicts and alternative suggestions
+   Example: "Show me free slots for next week with john@email.com and mary@email.com"
+
+B. TRANSCRIPT RETRIEVAL AND MANAGEMENT:
+   Command: "GET_TRANSCRIPT"
+   - Use GOOGLEMEET_GET_RECORDINGS_BY_CONFERENCE_RECORD_ID to fetch recordings
+   - Use GOOGLEMEET_GET_CONFERENCE_RECORD_FOR_MEET to get meeting details
+   - Retrieve and format meeting transcripts
+   - Send transcripts via email to specified recipients
+   Example: "Get me the transcript for meeting ID: abc-123-xyz"
+
+C. MEETING SCHEDULING AND MANAGEMENT:
+   Command: "SCHEDULE_MEETING"
+   Follow these steps:
 
 1. CALENDAR AVAILABILITY CHECK (CRITICAL):
-   - First, I will check calendar availability for all participants
-   - If no suitable slots are available, I will STOP and report back immediately
-   - If there are conflicts, I will provide alternative time suggestions
-   - Email all participants to confirm their availability before proceeding
+   - Use GOOGLECALENDAR_FIND_FREE_SLOTS to check participant availability
+   - If no slots available: Stop and report
+   - If conflicts: Provide alternatives
+   - Send availability confirmation emails using GMAIL_SEND_EMAIL
 
-2. MEETING SETUP (Only if calendar is available):
-   - Create a Google Meet link with recording enabled
-   - Generate a proper ICS format calendar invite
-   - Ensure all meeting metadata (title, description, duration) is properly set
-   - Configure recording settings for automatic start
-   - Prepare customized email templates for different participant roles
+2. MEETING SETUP:
+   - Use GOOGLEMEET_CREATE_MEET to generate meeting link
+   - Enable recording automatically
+   - Use GOOGLECALENDAR_CREATE_EVENT for calendar invite
+   - Set up proper meeting metadata
 
 3. CALENDAR AND EMAIL INTEGRATION:
-   - Schedule the event with proper ICS formatting
-   - Include the Google Meet link in the calendar description
-   - Add all participants with proper roles (organizer/attendee)
-   - Set appropriate reminders
-   - MANDATORY: Send email invites to all participants containing:
-     * ICS calendar attachment
-     * Clear meeting agenda
-     * Google Meet joining instructions
-     * Role-specific information
-     * Required preparation materials
+   - Schedule with ICS formatting
+   - Include Meet link in description
+   - Add participants and roles
+   - Use GMAIL_SEND_EMAIL to distribute invites with:
+     * Calendar attachment
+     * Agenda
+     * Joining instructions
+     * Role information
+     * Required materials
 
-4. AUTOMATED EMAIL COMMUNICATIONS:
-   - Send immediate calendar invites upon meeting creation
-   - Configure reminder emails (24h and 1h before meeting)
-   - Set up automatic follow-up emails post-meeting
-   - Include meeting-specific resources in all communications
-   - Track email delivery and participant responses
+4. AUTOMATED COMMUNICATIONS:
+   - Send calendar invites
+   - Configure reminder emails
+   - Track responses
+   - Use GMAIL_SEND_EMAIL for all notifications
 
 5. POST-MEETING WORKFLOW:
-   - Activate automatic recording
-   - Enable transcript generation
-   - MANDATORY: Email within 1 hour of meeting completion:
-     * Meeting recording link
-     * Full transcript (if available)
-     * Action items and key decisions
-     * Any shared resources or documents
-   - Send separate emails to different participant groups based on roles
+   - Use GOOGLEMEET_GET_RECORDINGS_BY_CONFERENCE_RECORD_ID for recordings
+   - Use GOOGLEMEET_GET_CONFERENCE_RECORD_FOR_MEET for meeting data
+   - Send within 1 hour via GMAIL_SEND_EMAIL:
+     * Recording link
+     * Transcript
+     * Action items
+     * Shared resources
 
-6. ERROR HANDLING AND COMMUNICATION:
-   - If any step fails, send immediate notification emails to organizers
-   - Provide clear error descriptions and recommended actions
-   - Send status updates to affected participants
-   - Maintain an email log of all communications
+6. ERROR HANDLING:
+   - Send immediate notifications for failures
+   - Provide error details and solutions
+   - Keep participants updated
+   - Log all communications
 
-7. FOLLOW-UP PROTOCOL:
-   - Send confirmation emails for any meeting modifications
-   - Distribute post-meeting surveys if requested
-   - Schedule any follow-up meetings with email notifications
-   - Archive all meeting materials and send access links
+7. FOLLOW-UP ACTIONS:
+   - Send modification confirmations
+   - Distribute post-meeting materials
+   - Schedule follow-ups as needed
+   - Archive meeting content
 
-Additional Instructions:
-- ALL communications must be sent via email
-- Maintain separate email distribution lists for different participant roles
-- Include clear subject lines for all emails
-- Follow proper email etiquette and formatting
-- Support email threading for related communications
-- Enable email notifications for recording access
-- Configure auto-forwarding of transcripts to specified participants
-- Track and confirm email delivery status
+VALID COMMANDS:
+1. "CHECK_FREE_SLOTS [participants] [timeframe]"
+2. "GET_TRANSCRIPT [meeting_id]"
+3. "SCHEDULE_MEETING [details]"
+4. "SHOW_CALENDAR [timeframe]"
+5. "FETCH_RECORDING [meeting_id]"
 
-MANDATORY EMAIL CHECKPOINTS:
-1. Initial meeting creation
-2. Calendar invite distribution
-3. Pre-meeting reminders
+Available Tools:
+- GOOGLEMEET_CREATE_MEET
+- GOOGLEMEET_GET_RECORDINGS_BY_CONFERENCE_RECORD_ID
+- GOOGLEMEET_GET_CONFERENCE_RECORD_FOR_MEET
+- GOOGLEMEET_GET_MEET
+- GOOGLECALENDAR_CREATE_EVENT
+- GOOGLECALENDAR_FIND_FREE_SLOTS
+- GMAIL_SEND_EMAIL
+
+Email Rules:
+- All communications via GMAIL_SEND_EMAIL
+- Clear subject lines
+- Proper email formatting
+- Include necessary attachments
+- Track delivery status
+
+Required Email Confirmations:
+1. Meeting creation
+2. Calendar invites
+3. Reminders
 4. Post-meeting materials
-5. Follow-up communications
+5. Follow-ups
 
-NO STEP IS COMPLETE UNTIL ALL REQUIRED EMAILS ARE SENT AND CONFIRMED DELIVERED.
-
-Please wait while I process these steps sequentially and provide status updates via email.
+I will handle your request using the available tools and ensure all communications are properly sent and confirmed. Please specify your request using one of the valid commands or in natural language.
 """
         
         try:

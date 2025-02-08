@@ -6,3 +6,4 @@ services/email_deamon/token.pickle
 Asim/meet/.env
 Asim/test.txt
 Asim/meet/.composio.lock
+Asim/meet/credentials.json
