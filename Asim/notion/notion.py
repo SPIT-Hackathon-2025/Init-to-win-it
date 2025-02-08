@@ -246,97 +246,260 @@ def generate_ai_insights(df):
         return "Error generating AI insights"
 
 def generate_enhanced_graphs(df):
-    """Generate comprehensive set of graphs"""
+    """Generate comprehensive interactive graphs with detailed metrics"""
     graphs = {}
     
-    # 1. Status Distribution with details
-    fig_status = px.pie(df, names='Status', title='Task Status Distribution',
-                       color_discrete_sequence=px.colors.qualitative.Set3,
-                       hover_data=['Category', 'Priority'])
+    # Add calculated metrics
+    df['Days_to_Deadline'] = (df['Deadline'] - pd.Timestamp.now()).dt.days
+    df['Week_Number'] = df['Deadline'].dt.isocalendar().week
+    df['Month'] = df['Deadline'].dt.month_name()
     
-    # 2. Priority Distribution with timeline
-    fig_priority = px.sunburst(df, path=['Priority', 'Category'], 
-                              color='Days_to_Deadline',
-                              title='Priority and Category Distribution')
+    # 1. Advanced Task Distribution Sunburst with Metrics
+    fig_distribution = px.sunburst(
+        df,
+        path=['Category', 'Priority', 'Status'],
+        values='Days_to_Deadline',
+        color='Priority',
+        color_discrete_map={'High': '#ff4d4d', 'Medium': '#ffd966', 'Low': '#63c765'},
+        title='Task Distribution Overview',
+        width=800,
+        height=600
+    )
+    fig_distribution.update_traces(
+        textinfo='label+percent parent+value',
+        hovertemplate='<b>%{label}</b><br>' +
+                     'Days to Deadline: %{value:.0f}<br>' +
+                     'Percentage of Parent: %{percentParent:.1%}<br>' +
+                     'Percentage of Total: %{percentRoot:.1%}'
+    )
     
-    # 3. Enhanced Timeline
-    fig_timeline = px.timeline(df, x_start='Deadline', x_end='Deadline_End',
-                             y='Category', color='Priority',
-                             hover_data=['Status', 'Days_to_Deadline'])
+    # 2. Timeline Scatter Plot with Deadline Tracking
+    fig_timeline = go.Figure()
     
-    # 4. Category Distribution
-    fig_category = px.treemap(df, path=['Category', 'Priority', 'Status'],
-                             title='Task Category Hierarchy')
+    priority_colors = {'High': '#ff4d4d', 'Medium': '#ffd966', 'Low': '#63c765'}
+    status_symbols = {'Not Started': 'circle', 'In Progress': 'diamond', 'Completed': 'star'}
     
-    # 5. Priority-Category Matrix
-    matrix_data = pd.crosstab(df['Priority'], df['Category'])
-    fig_matrix = px.imshow(matrix_data, title='Priority-Category Matrix',
-                          color_continuous_scale='Viridis')
+    for priority in ['High', 'Medium', 'Low']:
+        for status in ['Not Started', 'In Progress', 'Completed']:
+            mask = (df['Priority'] == priority) & (df['Status'] == status)
+            
+            fig_timeline.add_trace(go.Scatter(
+                x=df[mask]['Deadline'],
+                y=df[mask]['Category'],
+                mode='markers',
+                name=f'{priority} - {status}',
+                marker=dict(
+                    size=15,
+                    symbol=status_symbols[status],
+                    color=priority_colors[priority],
+                    line=dict(width=1, color='white')
+                ),
+                text=df[mask]['Name'],
+                hovertemplate='<b>%{text}</b><br>' +
+                             'Category: %{y}<br>' +
+                             'Deadline: %{x|%Y-%m-%d}<br>' +
+                             'Priority: ' + priority + '<br>' +
+                             'Status: ' + status + '<br>' +
+                             '<extra></extra>'
+            ))
     
-    # 6. Deadline Distribution
-    fig_deadline = px.histogram(df, x='Days_to_Deadline',
-                               color='Priority', nbins=20,
-                               title='Days to Deadline Distribution')
-    
-    # 7. Weekly Workload
-    df['Week'] = df['Deadline'].dt.isocalendar().week
-    workload = df.groupby(['Week', 'Category']).size().unstack(fill_value=0)
-    fig_workload = px.bar(workload, title='Weekly Workload by Category',
-                         barmode='stack')
-    
-    # 8. Completion Trend
-    completion = df[df['Status'] == 'Completed'].groupby('Week').size()
-    fig_completion = px.line(x=completion.index, y=completion.values,
-                            title='Task Completion Trend',
-                            labels={'x': 'Week', 'y': 'Completed Tasks'})
-    
-    # 9. Category Relationships
-    category_matrix = pd.crosstab(df['Category'], df['Status'])
-    fig_relationships = px.scatter_matrix(df, dimensions=['Days_to_Deadline', 'Priority'],
-                                        color='Category', title='Task Relationships')
-    
-    # Convert all figures to HTML
-    graphs = {
-        'status_distribution': fig_status.to_html(
-            full_html=False,
-            include_plotlyjs=False,
-            config={'responsive': True}
-        ),
-        'priority_distribution': fig_priority.to_html(
-            full_html=False,
-            include_plotlyjs=False,
-            config={'responsive': True}
-        ),
-        'timeline': fig_timeline.to_html(
-            full_html=False,
-            include_plotlyjs=False,
-            config={'responsive': True}
-        ),
-        'category_distribution': fig_category.to_html(
-            full_html=False,
-            include_plotlyjs=False,
-            config={'responsive': True}
-        ),
-        'priority_category_matrix': fig_matrix.to_html(
-            full_html=False,
-            include_plotlyjs=False,
-            config={'responsive': True}
-        ),
-        'deadline_distribution': fig_deadline.to_html(
-            full_html=False,
-            include_plotlyjs=False,
-            config={'responsive': True}
-        ),
-        'workload_distribution': fig_workload.to_html(
-            full_html=False,
-            include_plotlyjs=False,
-            config={'responsive': True}
-        ),
-        'category_relationships': fig_relationships.to_html(
-            full_html=False,
-            include_plotlyjs=False,
-            config={'responsive': True}
+    fig_timeline.update_layout(
+        title='Task Timeline and Status Distribution',
+        xaxis_title='Deadline',
+        yaxis_title='Category',
+        height=500,
+        showlegend=True,
+        legend=dict(
+            groupclick="toggleitem",
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=1.05
         )
+    )
+    
+    # 3. Workload Distribution Heatmap with Metrics
+    workload_data = pd.crosstab(
+        [df['Category'], df['Priority']], 
+        df['Status'],
+        margins=True
+    )
+    
+    z_data = []
+    x_labels = []
+    y_labels = []
+    hover_text = []
+    
+    for cat_prio in workload_data.index[:-1]:  # Exclude 'All'
+        row = workload_data.loc[cat_prio]
+        z_data.append(row[:-1])  # Exclude 'All' column
+        y_labels.append(f"{cat_prio[0]} - {cat_prio[1]}")
+        hover_text.append([
+            f"Category: {cat_prio[0]}<br>" +
+            f"Priority: {cat_prio[1]}<br>" +
+            f"Status: {col}<br>" +
+            f"Count: {val}"
+            for col, val in zip(workload_data.columns[:-1], row[:-1])
+        ])
+    
+    fig_heatmap = go.Figure(data=go.Heatmap(
+        z=z_data,
+        x=workload_data.columns[:-1],
+        y=y_labels,
+        colorscale='YlOrRd',
+        text=[[str(val) for val in row] for row in z_data],
+        texttemplate="%{text}",
+        textfont={"size": 12},
+        hoverongaps=False,
+        hoverinfo='text',
+        hovertext=hover_text
+    ))
+    
+    fig_heatmap.update_layout(
+        title='Task Distribution Matrix',
+        height=600,
+        xaxis_title='Status',
+        yaxis_title='Category - Priority',
+        yaxis={'categoryorder': 'category ascending'}
+    )
+    
+    # 4. Progress Gauge Chart
+    fig_progress = make_subplots(
+        rows=2, cols=2,
+        specs=[[{'type': 'indicator'}, {'type': 'indicator'}],
+               [{'type': 'indicator'}, {'type': 'indicator'}]],
+        subplot_titles=(
+            'Overall Completion Rate',
+            'High Priority Progress',
+            'Tasks On Schedule',
+            'Category Distribution'
+        )
+    )
+    
+    # Overall completion rate
+    completion_rate = (len(df[df['Status'] == 'Completed']) / len(df) * 100)
+    
+    # High priority progress
+    high_priority_rate = (
+        len(df[(df['Priority'] == 'High') & (df['Status'] == 'Completed')]) /
+        len(df[df['Priority'] == 'High']) * 100
+        if len(df[df['Priority'] == 'High']) > 0 else 0
+    )
+    
+    # Tasks on schedule
+    on_schedule_rate = (
+        len(df[df['Days_to_Deadline'] > 0]) / len(df) * 100
+    )
+    
+    # Category distribution
+    category_balance = (
+        1 - (df['Category'].value_counts().std() / df['Category'].value_counts().mean())
+    ) * 100
+    
+    # Add indicators
+    fig_progress.add_trace(
+        go.Indicator(
+            mode="gauge+number+delta",
+            value=completion_rate,
+            title={'text': "Completion Rate"},
+            delta={'reference': 100},
+            gauge={
+                'axis': {'range': [0, 100]},
+                'steps': [
+                    {'range': [0, 50], 'color': '#ffcdd2'},
+                    {'range': [50, 80], 'color': '#fff9c4'},
+                    {'range': [80, 100], 'color': '#c8e6c9'}
+                ],
+                'threshold': {
+                    'line': {'color': 'red', 'width': 4},
+                    'thickness': 0.75,
+                    'value': 95
+                }
+            }
+        ),
+        row=1, col=1
+    )
+    
+    fig_progress.add_trace(
+        go.Indicator(
+            mode="gauge+number+delta",
+            value=high_priority_rate,
+            title={'text': "High Priority"},
+            delta={'reference': 100},
+            gauge={
+                'axis': {'range': [0, 100]},
+                'steps': [
+                    {'range': [0, 60], 'color': '#ffcdd2'},
+                    {'range': [60, 85], 'color': '#fff9c4'},
+                    {'range': [85, 100], 'color': '#c8e6c9'}
+                ],
+                'threshold': {
+                    'line': {'color': 'red', 'width': 4},
+                    'thickness': 0.75,
+                    'value': 90
+                }
+            }
+        ),
+        row=1, col=2
+    )
+    
+    fig_progress.add_trace(
+        go.Indicator(
+            mode="gauge+number+delta",
+            value=on_schedule_rate,
+            title={'text': "On Schedule"},
+            delta={'reference': 100},
+            gauge={
+                'axis': {'range': [0, 100]},
+                'steps': [
+                    {'range': [0, 70], 'color': '#ffcdd2'},
+                    {'range': [70, 90], 'color': '#fff9c4'},
+                    {'range': [90, 100], 'color': '#c8e6c9'}
+                ],
+                'threshold': {
+                    'line': {'color': 'red', 'width': 4},
+                    'thickness': 0.75,
+                    'value': 95
+                }
+            }
+        ),
+        row=2, col=1
+    )
+    
+    fig_progress.add_trace(
+        go.Indicator(
+            mode="gauge+number",
+            value=category_balance,
+            title={'text': "Category Balance"},
+            gauge={
+                'axis': {'range': [0, 100]},
+                'steps': [
+                    {'range': [0, 40], 'color': '#ffcdd2'},
+                    {'range': [40, 70], 'color': '#fff9c4'},
+                    {'range': [70, 100], 'color': '#c8e6c9'}
+                ],
+                'threshold': {
+                    'line': {'color': 'red', 'width': 4},
+                    'thickness': 0.75,
+                    'value': 80
+                }
+            }
+        ),
+        row=2, col=2
+    )
+    
+    fig_progress.update_layout(
+        height=800,
+        grid={'rows': 2, 'columns': 2, 'pattern': 'independent'},
+        showlegend=False
+    )
+    
+    # Convert figures to HTML
+    graphs = {
+        'distribution': fig_distribution.to_html(full_html=False, include_plotlyjs=False),
+        'timeline': fig_timeline.to_html(full_html=False, include_plotlyjs=False),
+        'heatmap': fig_heatmap.to_html(full_html=False, include_plotlyjs=False),
+        'progress': fig_progress.to_html(full_html=False, include_plotlyjs=False)
     }
     
     return graphs
@@ -442,42 +605,23 @@ def create_task():
 
 @app.route('/dashboard')
 def dashboard():
-    """Render the task graphs dashboard"""
     try:
         analysis = generate_task_analysis()
         graphs = analysis.get('graphs_html')
         if not graphs:
             return "No graphs available", 404
-        dashboard_html = f"""
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <title>Task Graphs Dashboard</title>
-            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-            <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-        </head>
-        <body class="bg-gray-100">
-            <div class="container mx-auto px-4 py-8">
-                <header class="mb-8">
-                    <h1 class="text-4xl font-bold">Task Graphs Dashboard</h1>
-                    <p>Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
-                </header>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>{graphs['graph_status']}</div>
-                    <div>{graphs['graph_priority_category']}</div>
-                    <div>{graphs['graph_timeline']}</div>
-                    <div>{graphs['graph_deadline_histogram']}</div>
-                    <div class="md:col-span-2">{graphs['graph_completion_trend']}</div>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
-        return dashboard_html
+        
+        return render_template(
+            'dashboard.html',
+            timeline_sunburst=graphs['timeline_sunburst'],
+            priority_matrix=graphs['priority_matrix'],
+            workload_heatmap=graphs['workload_heatmap'],
+            completion_gauges=graphs['completion_gauges'],
+            last_updated=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        )
     except Exception as e:
         logger.error(f"Error rendering dashboard: {str(e)}")
-        return jsonify({'error': f'Failed to render dashboard: {str(e)}'}), 500
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/analysis')
 def get_analysis():
@@ -494,18 +638,19 @@ def get_analysis():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/graphs')
+@app.route('/graphs')
 def show_graphs():
-    """Render the comprehensive graphs dashboard"""
     try:
         analysis = generate_task_analysis()
         if not analysis or not analysis.get('graphs_html'):
             return "No data available", 404
         
-        # Add plot.js configuration for better rendering
         return render_template(
             'graphs.html',
-            graphs=analysis['graphs_html'],
-            ai_insights=analysis['insights_json'].get('ai_insights', ''),
+            distribution=analysis['graphs_html']['distribution'],
+            timeline=analysis['graphs_html']['timeline'],
+            heatmap=analysis['graphs_html']['heatmap'],
+            progress=analysis['graphs_html']['progress'],
             last_updated=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         )
     except Exception as e:
