@@ -2,7 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCalendar, FiSend, FiClock } from 'react-icons/fi';
 import { SiNotion } from 'react-icons/si';
+<<<<<<< Updated upstream
 import { BsKanban } from 'react-icons/bs';
+=======
+import AdvancedAnalytics from '@/components/analytics';
+>>>>>>> Stashed changes
 
 const Dashboard = () => {
   const [greeting, setGreeting] = useState('');

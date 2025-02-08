@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS  # Add this import
 from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain import hub
 from langchain_openai import ChatOpenAI
@@ -35,8 +36,12 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = Flask(__name__)
+<<<<<<< Updated upstream
 CORS(app)
 
+=======
+CORS(app)  # Enable CORS for all routes
+>>>>>>> Stashed changes
 
 # Initialize LangChain and Composio components
 llm = ChatOpenAI()
