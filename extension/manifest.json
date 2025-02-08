@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Meet Audio Recorder",
+  "version": "1.0",
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "desktopCapture",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [{
+    "matches": ["https://meet.google.com/*"],
+    "js": ["content.js"]
+  }]
+}

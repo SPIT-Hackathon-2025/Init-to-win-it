@@ -13,25 +13,30 @@ const Details = () => {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:3000/run-auth', {
+            const response = await fetch('http://127.0.0.1:5000/api-auth', {  // Updated endpoint
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ apiKey }),
+                body: JSON.stringify({ api_key: apiKey }),
             });
 
+            const data = await response.json();
+            
             if (!response.ok) {
-                throw new Error('Authentication failed');
+                throw new Error(data.error || 'Authentication failed');
             }
 
-            // Handle successful response here
-            const data = await response.json();
-            console.log(data);
-            // Navigate or update UI based on successful authentication
+            // Open the OAuth URL in a new window
+            if (data.redirectUrl) {
+                window.open(data.redirectUrl, '_blank', 'width=600,height=800');
+            } else {
+                throw new Error('No redirect URL received');
+            }
 
         } catch (err) {
-            setError('Failed to authenticate API key. Please try again.');
+            console.error("Error:", err);
+            setError(err.message || 'Failed to authenticate. Please try again.');
         } finally {
             setIsLoading(false);
         }

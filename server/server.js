@@ -10,6 +10,7 @@ import authRoutes from "./routers/authRoutes.js";
 import botRoutes from "./routers/botRoutes.js";
 import imageRoutes from "./routers/imageRoutes.js"
 import adminRoutes from "./routers/adminRoutes.js";
+import { googleAuthentication } from "./controllers/authController.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -33,6 +34,8 @@ app.get("/", (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/bot', botRoutes);
 app.use('/image',imageRoutes );
+
+app.post('/run-auth', googleAuthentication);
 
 app.use(jwtAuth);
 app.use('/admin', adminRoutes);
