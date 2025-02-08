@@ -23,7 +23,6 @@ const EnhancedAnalytics = ({ data }) => {
     }
   };
 
-  // Update chart colors
   const chartColors = [
     colors.yellow.primary,
     colors.yellow.secondary,
@@ -42,6 +41,23 @@ const EnhancedAnalytics = ({ data }) => {
     );
   }
 
+  // Process data for priority-status visualization
+  const priorityStatusData = Object.entries(data.tasks_by_priority).map(([priority, count]) => {
+    const priorityTotal = count;
+    const completed = Math.round((data.tasks_by_status.Completed / data.total_tasks) * count);
+    const inProgress = Math.round((data.tasks_by_status['In Progress'] / data.total_tasks) * count);
+    const notStarted = priorityTotal - completed - inProgress;
+
+    return {
+      priority,
+      completed,
+      inProgress,
+      notStarted,
+      completionRate: ((completed / priorityTotal) * 100).toFixed(1),
+      totalTasks: priorityTotal
+    };
+  });
+
   // Priority distribution data
   const priorityData = Object.entries(data.tasks_by_priority).map(([priority, count]) => ({
     name: priority,
@@ -55,13 +71,6 @@ const EnhancedAnalytics = ({ data }) => {
     tasks: count,
     percentage: ((count / data.total_tasks) * 100).toFixed(1)
   })).sort((a, b) => b.tasks - a.tasks);
-
-  // Status progress data
-  const statusData = Object.entries(data.tasks_by_status).map(([status, count]) => ({
-    name: status,
-    value: count,
-    percentage: ((count / data.total_tasks) * 100).toFixed(1)
-  }));
 
   // Radar chart data for task distribution
   const radarData = categoryData.map(item => ({
@@ -112,6 +121,41 @@ const EnhancedAnalytics = ({ data }) => {
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* New Priority-Status Matrix Chart */}
+        <Card className="bg-black border-2 border-yellow-400">
+          <CardHeader className="p-4">
+            <CardTitle className="text-xl font-bold text-yellow-400">Priority Status Matrix</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer>
+                <BarChart
+                  data={priorityStatusData}
+                  layout="vertical"
+                  barGap={0}
+                  barSize={20}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke={colors.yellow.primary} opacity={0.2} />
+                  <XAxis type="number" stroke={colors.yellow.primary} />
+                  <YAxis dataKey="priority" type="category" stroke={colors.yellow.primary} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: colors.black.pure,
+                      border: `1px solid ${colors.yellow.primary}`,
+                      color: colors.yellow.primary
+                    }}
+                    formatter={(value, name) => [`${value} tasks`, name]}
+                  />
+                  <Legend />
+                  <Bar dataKey="completed" name="Completed" stackId="status" fill={colors.yellow.primary} />
+                  <Bar dataKey="inProgress" name="In Progress" stackId="status" fill={colors.yellow.secondary} />
+                  <Bar dataKey="notStarted" name="Not Started" stackId="status" fill={colors.yellow.tertiary} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Priority Distribution Pie Chart */}
         <Card className="bg-black border-2 border-yellow-400">
           <CardHeader className="p-4">
@@ -178,7 +222,7 @@ const EnhancedAnalytics = ({ data }) => {
           </CardContent>
         </Card>
 
-        {/* Status Distribution Radar Chart */}
+        {/* Task Distribution Radar Chart */}
         <Card className="bg-black border-2 border-yellow-400">
           <CardHeader className="p-4">
             <CardTitle className="text-xl font-bold text-yellow-400">Task Distribution Radar</CardTitle>
@@ -205,38 +249,6 @@ const EnhancedAnalytics = ({ data }) => {
                     }}
                   />
                 </RadarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Status Progress Line Chart */}
-        <Card className="bg-black border-2 border-yellow-400">
-          <CardHeader className="p-4">
-            <CardTitle className="text-xl font-bold text-yellow-400">Task Status Progress</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer>
-                <LineChart data={statusData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={colors.yellow.primary} opacity={0.2} />
-                  <XAxis dataKey="name" stroke={colors.yellow.primary} />
-                  <YAxis stroke={colors.yellow.primary} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: colors.black.pure,
-                      border: `1px solid ${colors.yellow.primary}`,
-                      color: colors.yellow.primary
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke={colors.yellow.primary}
-                    strokeWidth={2}
-                    dot={{ fill: colors.yellow.secondary }}
-                  />
-                </LineChart>
               </ResponsiveContainer>
             </div>
           </CardContent>

@@ -1,51 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Terminal, BarChart3, Brain, AlertCircle, Download } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Terminal, Brain, AlertCircle, Download } from 'lucide-react';
 import AdvancedAnalytics from '@/components/analytics';
 import html2pdf from 'html2pdf.js';
 
 const API_BASE_URL = 'http://127.0.0.1:8080';
 
-const loadingEmojis = ["🎯", "⚡", "🔄", "✨"];
-const loadingPhrases = [
-  {
-    emoji: "🎯",
-    text: "Targeting your task objectives...",
-    rotation: -15
-  },
-  {
-    emoji: "⚡",
-    text: "Powering up the task engine...",
-    rotation: 15
-  },
-  {
-    emoji: "🔄",
-    text: "Synchronizing with Notion...",
-    rotation: -10
-  },
-  {
-    emoji: "✨",
-    text: "Sprinkling some AI magic...",
-    rotation: 10
-  }
-];
-
-const schedulingPhrases = [
-  { text: "🎯 Analyzing task requirements...", duration: 2000 },
-  { text: "⚡ Processing task details...", duration: 2000 },
-  { text: "🔄 Organizing schedule...", duration: 2000 },
-  { text: "✨ Finalizing task entry...", duration: 2000 }
-];
-
 const analysisPhrases = [
-  { text: "🔍 Initializing data analysis...", duration: 2000 },
-  { text: "📊 Crunching numbers...", duration: 2000 },
-  { text: "🧮 Calculating metrics...", duration: 2000 },
-  { text: "📈 Generating insights...", duration: 2000 },
-  { text: "🎨 Creating visualizations...", duration: 2000 },
-  { text: "🤖 Applying AI analysis...", duration: 2000 },
-  { text: "📝 Compiling report...", duration: 2000 },
-  { text: "✨ Finalizing results...", duration: 2000 }
+  { text: "🔍 Initializing analysis...", duration: 1250 },
+  { text: "📊 Processing data...", duration: 1250 },
+  { text: "🤖 Applying AI analysis...", duration: 1250 },
+  { text: "✨ Finalizing results...", duration: 1250 }
 ];
 
 const colors = {
@@ -67,23 +31,13 @@ const NotionAIApp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [analysisData, setAnalysisData] = useState(null);
-  const [loadingText, setLoadingText] = useState('');
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [currentPhrase, setCurrentPhrase] = useState('');
 
   useEffect(() => {
-    // Fetch initial analysis data when component mounts
     fetchAnalysis();
   }, []);
-
-  const cycleLoadingText = () => {
-    let currentIndex = 0;
-    return setInterval(() => {
-      setLoadingText(loadingPhrases[currentIndex]);
-      currentIndex = (currentIndex + 1) % loadingPhrases.length;
-    }, 2000);
-  };
 
   const runLoadingSequence = async (phrases) => {
     for (const phrase of phrases) {
@@ -93,7 +47,26 @@ const NotionAIApp = () => {
   };
 
   const handleDownloadPDF = () => {
-    const element = document.getElementById('analysis-report');
+    // Create a temporary div to combine analytics and insights
+    const tempDiv = document.createElement('div');
+    
+    // Clone the analytics report
+    const analyticsReport = document.getElementById('analysis-report').cloneNode(true);
+    
+    // Create insights section
+    const insightsDiv = document.createElement('div');
+    insightsDiv.className = 'mt-8 p-4';
+    insightsDiv.innerHTML = `
+      <h2 class="text-2xl font-bold mb-4">AI Insights</h2>
+      <div class="prose prose-invert prose-yellow">
+        ${analysisData.ai_insights}
+      </div>
+    `;
+    
+    // Combine both elements
+    tempDiv.appendChild(analyticsReport);
+    tempDiv.appendChild(insightsDiv);
+    
     const opt = {
       margin: 1,
       filename: 'task-analysis-report.pdf',
@@ -101,7 +74,8 @@ const NotionAIApp = () => {
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
-    html2pdf().set(opt).from(element).save();
+    
+    html2pdf().set(opt).from(tempDiv).save();
   };
 
   const handleGenerateReport = async () => {
@@ -125,8 +99,6 @@ const NotionAIApp = () => {
     setError(null);
     
     try {
-      await runLoadingSequence(schedulingPhrases);
-      
       const response = await fetch(`${API_BASE_URL}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -196,7 +168,7 @@ const NotionAIApp = () => {
           </div>
         </div>
 
-        {/* Loading Screens */}
+        {/* Loading Screen */}
         {(loading || analysisLoading) && (
           <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
             <div className="text-center space-y-8">
@@ -209,24 +181,6 @@ const NotionAIApp = () => {
             </div>
           </div>
         )}
-
-        {/* Analysis Results */}
-        {analysisData && (
-          <div className="bg-black rounded-lg p-6 shadow-lg space-y-6 border border-yellow-400">
-            <h2 className="text-2xl font-bold mb-4 text-yellow-400">Analysis Results</h2>
-            <AdvancedAnalytics data={analysisData} />
-          </div>
-        )}
-
-        {/* Advanced Analysis Button */}
-        <div className="flex justify-center">
-          <button
-            onClick={() => window.location.href = `${API_BASE_URL}/graphs`}
-            className="flex items-center gap-2 bg-yellow-400 text-black px-8 py-4 rounded-lg hover:bg-yellow-300 transition-colors font-bold text-lg"
-          >
-            <Brain /> View Advanced Analysis
-          </button>
-        </div>
 
         {/* Analysis Section */}
         <div className="space-y-6">
@@ -247,7 +201,7 @@ const NotionAIApp = () => {
                   className="flex items-center gap-2 bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 transition-colors"
                 >
                   <Download size={20} />
-                  Download PDF
+                  Download Report
                 </button>
               </div>
               <div id="analysis-report" className="bg-black text-yellow-400">
@@ -258,7 +212,7 @@ const NotionAIApp = () => {
         </div>
       </div>
 
-      {/* Add keyframe animations */}
+      {/* Styles */}
       <style jsx global>{`
         @keyframes pulse {
           0% { opacity: 0.4; }
@@ -266,12 +220,6 @@ const NotionAIApp = () => {
           100% { opacity: 0.4; }
         }
         
-        @keyframes spin {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        /* Override any non-black/yellow colors */
         * {
           scrollbar-color: #FCD34D #000000;
         }

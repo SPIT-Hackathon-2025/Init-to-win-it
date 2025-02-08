@@ -2,11 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCalendar, FiSend, FiClock } from 'react-icons/fi';
 import { SiNotion } from 'react-icons/si';
-<<<<<<< Updated upstream
 import { BsKanban } from 'react-icons/bs';
-=======
-import AdvancedAnalytics from '@/components/analytics';
->>>>>>> Stashed changes
 
 const Dashboard = () => {
   const [greeting, setGreeting] = useState('');
@@ -214,7 +210,7 @@ const Dashboard = () => {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 
                 bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-400 
-                rounded-md transition-colors"
+          rounded-md transition-colors"
             >
               <span>💻</span> Join Meeting
             </a>
