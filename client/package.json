@@ -57,6 +57,7 @@
     "recharts": "^2.15.1",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
+    "tailwind-scrollbar-hide": "^2.0.0",
     "tailwindcss-animate": "^1.0.7",
     "typewriter-effect": "^2.21.0"
   },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCalendar, FiSend } from 'react-icons/fi';
 import { SiNotion } from 'react-icons/si';
@@ -8,12 +8,27 @@ const Dashboard = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState(null);
+  const textAreaRef = useRef(null);
+  const [events, setEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
+
+  // Add API key constant (replace with your actual API key)
+  const API_KEY = import.meta.env.VITE_COMPOSIO_API_KEY;  // Add this line
+  
+  // // Add mockTasks definition
+  const mockTasks = [
+    { title: 'Review Q4 Marketing Strategy', status: 'In Progress', priority: 'High' },
+    { title: 'Prepare Client Presentation', status: 'Todo', priority: 'Medium' },
+    { title: 'Update Content Calendar', status: 'In Progress', priority: 'High' },
+    { title: 'Social Media Analytics Report', status: 'Todo', priority: 'Low' }
+  ];
 
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Good Morning');
     else if (hour < 18) setGreeting('Good Afternoon');
     else setGreeting('Good Evening');
+    fetchEvents();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -24,7 +39,7 @@ const Dashboard = () => {
     setApiResponse(null);
 
     try {
-      const response = await fetch('http://localhost:5002/create-doc', {
+      const response = await fetch('http://127.0.0.1:5002/create-doc', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,19 +56,162 @@ const Dashboard = () => {
     }
   };
 
-  const mockSchedule = [
-    { time: '09:00 AM', title: 'Team Standup', duration: '30min' },
-    { time: '10:30 AM', title: 'Client Meeting', duration: '1h' },
-    { time: '02:00 PM', title: 'Product Review', duration: '45min' },
-    { time: '04:00 PM', title: 'Marketing Sync', duration: '1h' }
-  ];
+  const adjustTextAreaHeight = () => {
+    const textarea = textAreaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
 
-  const mockTasks = [
-    { title: 'Review Q4 Marketing Strategy', status: 'In Progress', priority: 'High' },
-    { title: 'Prepare Client Presentation', status: 'Todo', priority: 'Medium' },
-    { title: 'Update Content Calendar', status: 'In Progress', priority: 'High' },
-    { title: 'Social Media Analytics Report', status: 'Todo', priority: 'Low' }
-  ];
+  const fetchEvents = async () => {
+    setEventsLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:5001/get-events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ api_key: API_KEY }), // Use the defined API key
+      });
+      const data = await response.json();
+      const parsedEvents = parseEventsData(data.output);
+      setEvents(parsedEvents);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setEventsLoading(false);
+    }
+  };
+
+  const parseEventsData = (outputText) => {
+    if (!outputText) return [];
+    
+    // Split by numbered events and filter out non-event text
+    const events = outputText.split(/\d+\.\s+\*\*/).filter(str => str.includes('**'));
+    
+    return events.map(eventStr => {
+      const lines = eventStr.split('\n');
+      const title = lines[0].replace(/\*\*/g, '').trim();
+      const details = {};
+      
+      // Parse each line for details
+      lines.slice(1).forEach(line => {
+        const cleanLine = line.replace(/^\s*-\s*/, '').replace(/\*\*/g, '');
+        
+        if (cleanLine.includes('Date and Time:')) {
+          const [date, time] = cleanLine.split('Date and Time:')[1].split(',').map(s => s.trim());
+          details.date = date;
+          details.time = time.split('(')[0].trim();
+          details.timezone = time.match(/\((.*?)\)/)?.[1] || '';
+        }
+        else if (cleanLine.includes('Attendees:')) {
+          details.attendees = cleanLine.split('Attendees:')[1].trim();
+        }
+        else if (cleanLine.includes('Location:')) {
+          details.location = cleanLine.split('Location:')[1].trim();
+        }
+        else if (cleanLine.includes('Join Meeting')) {
+          const meetLink = cleanLine.match(/\((https:\/\/.*?)\)/)?.[1];
+          if (meetLink) details.meetLink = meetLink;
+        }
+      });
+
+      return {
+        title,
+        ...details
+      };
+    });
+  };
+
+  const renderScheduleSection = () => (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="bg-[#131313] backdrop-blur-lg rounded-lg p-6 border border-yellow-400/20"
+    >
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <FiCalendar className="text-yellow-400 w-6 h-6" />
+          <h2 className="text-2xl font-semibold text-yellow-400">Your Schedule</h2>
+        </div>
+        <button 
+          onClick={fetchEvents}
+          className="px-3 py-1 text-sm bg-yellow-400/10 hover:bg-yellow-400/20 
+            text-yellow-400 rounded-md transition-colors"
+        >
+          Refresh
+        </button>
+      </div>
+      
+      {eventsLoading ? (
+        <div className="flex justify-center py-8">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-6 h-6 border-2 border-yellow-400 border-t-transparent rounded-full"
+          />
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {events.map((event, index) => (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              key={index}
+              className="p-4 rounded-lg bg-yellow-400/5 border border-yellow-400/10 
+                hover:border-yellow-400/30 transition-colors"
+            >
+              <h3 className="text-yellow-100 font-medium mb-2">{event.title}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="text-yellow-400/60 space-y-2">
+                  <p className="flex items-center gap-2">
+                    <span>📅</span> {event.date}
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span>⏰</span> {event.time}
+                  </p>
+                  {event.timezone && (
+                    <p className="flex items-center gap-2">
+                      <span>🌍</span> {event.timezone}
+                    </p>
+                  )}
+                  {event.location && (
+                    <p className="flex items-center gap-2">
+                      <span>📍</span> {event.location}
+                    </p>
+                  )}
+                </div>
+                <div className="text-yellow-400/60 space-y-2">
+                  {event.attendees && (
+                    <p className="flex items-center gap-2">
+                      <span>👥</span> {event.attendees}
+                    </p>
+                  )}
+                  {event.meetLink && (
+                    <a
+                      href={event.meetLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 mt-2 px-4 py-2 
+                        bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-400 
+                        rounded-md transition-colors"
+                    >
+                      <span>💻</span> Join Meeting
+                    </a>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+          {events.length === 0 && !eventsLoading && (
+            <p className="text-center text-yellow-400/60 py-8">No upcoming events</p>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
 
   return (
     <div className="min-h-screen  p-8">
@@ -109,31 +267,54 @@ const Dashboard = () => {
 
         {/* Chat Interface */}
         <div className="mb-12">
-          <form onSubmit={handleSubmit} className="relative">
-            <input
-              type="text"
+          <form onSubmit={handleSubmit} className="relative group">
+            <textarea
+              ref={textAreaRef}
               value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="How can I assist you today?"
-              className="w-full p-4 pr-12 rounded-lg bg-[#131313] border border-yellow-400/20 
-                text-yellow-100 placeholder-yellow-600/30 focus:outline-none focus:border-yellow-400 
-                transition-colors backdrop-blur-lg"
+              onChange={(e) => {
+                setInputMessage(e.target.value);
+                adjustTextAreaHeight();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
+              placeholder="How can I assist you today? Press Shift + Enter for new line"
+              rows="1"
+              className="w-full p-6 rounded-xl bg-[#131313] border-2 border-yellow-400/10 
+                text-yellow-100 placeholder-yellow-600/30 focus:outline-none focus:border-yellow-400/40 
+                transition-all duration-300 backdrop-blur-lg resize-none min-h-[60px] max-h-[300px] 
+                scrollbar-hide shadow-lg hover:border-yellow-400/20 
+                focus:shadow-yellow-400/5 focus:shadow-lg"
             />
-            <button
-              onClick={handleSubmit}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-yellow-400 
-                hover:text-yellow-300 transition-colors"
-            >
-              {isLoading ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full"
-                />
-              ) : (
-                <FiSend size={20} />
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+              {inputMessage.length > 0 && !isLoading && (
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 0.5, scale: 1 }}
+                  className="text-xs text-yellow-400/50"
+                >
+                  Press Enter ↵
+                </motion.span>
               )}
-            </button>
+              <button
+                onClick={handleSubmit}
+                className="text-yellow-400/70 hover:text-yellow-400 transition-colors
+                  hover:scale-110 transform duration-200 p-2"
+              >
+                {isLoading ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-5 h-5 border-2 border-yellow-400 border-t-transparent rounded-full"
+                  />
+                ) : (
+                  <FiSend size={20} />
+                )}
+              </button>
+            </div>
           </form>
 
           {/* API Response Section */}
@@ -173,34 +354,7 @@ const Dashboard = () => {
 
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Schedule Column */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-[#131313] backdrop-blur-lg rounded-lg p-6 border border-yellow-400/20"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <FiCalendar className="text-yellow-400 w-6 h-6" />
-              <h2 className="text-2xl font-semibold text-yellow-400">Your Schedule</h2>
-            </div>
-            <div className="space-y-4">
-              {mockSchedule.map((event, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 rounded-lg 
-                    bg-yellow-400/5 border border-yellow-400/10 hover:border-yellow-400/30 
-                    transition-colors"
-                >
-                  <div>
-                    <p className="text-yellow-100 font-medium">{event.title}</p>
-                    <p className="text-yellow-400/60 text-sm">{event.time}</p>
-                  </div>
-                  <span className="text-yellow-400/80 text-sm">{event.duration}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
+          {renderScheduleSection()}
           {/* Tasks Column */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
