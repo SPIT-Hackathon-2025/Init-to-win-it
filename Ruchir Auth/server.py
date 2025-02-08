@@ -48,12 +48,6 @@ def extract_email(text):
     emails = re.findall(email_pattern, text)
     return emails
 
-def analyze_prompt(text):
-    """Analyze prompt for user intentions."""
-    create_doc = any(keyword in text.lower() for keyword in ['create doc', 'make doc', 'write doc', 'generate doc'])
-    send_email = any(keyword in text.lower() for keyword in ['send', 'email', 'mail'])
-    return create_doc, send_email
-
 @app.route('/create-doc', methods=['POST'])
 def create_document():
     try:
@@ -62,39 +56,32 @@ def create_document():
         
         # Extract emails from prompt
         emails = extract_email(prompt)
+        # If no email found in prompt, use default
         email_list = emails if emails else [FRIEND_EMAIL]
         
         executor = initialize_agent()
         
-        # Create a specific task that ensures document creation and sharing
-        task = f"""
-        Follow these steps exactly:
-        1. Create a new Google Doc with content based on these requirements:
-        {prompt}
+        # Create document based on prompt
+        doc_result = executor.invoke({"input": prompt})
         
-        2. After creating the document, you must:
-           - Share the document with all of these emails: {', '.join(email_list)}
-           - Send an email to all recipients ({', '.join(email_list)}) that includes:
-             * The link to the created document
-             * A brief summary of what was created
-             * Any specific instructions from the original prompt
-        
-        3. Make sure to:
-           - Set document permissions so recipients can access it
-           - Include the document link in the email
-           - Confirm once both document creation and email sending are complete
-        
-        Execute these steps and provide me with the document link and confirmation of email sending.
-        """
-        
-        # Execute the task
-        result = executor.invoke({"input": task})
+        # Send email to all found recipients
+        email_results = []
+        for email in email_list:
+            email_task = f"""
+            Send an email to {email} with:
+            Subject: Important Document
+            Body: Here is the important document content:
+
+            {doc_result['output']}
+            """
+            email_result = executor.invoke({"input": email_task})
+            email_results.append(email_result['output'])
         
         return jsonify({
             "status": "success",
-            "result": result['output'],
-            "recipients": email_list,
-            "message": "Document created and shared with all specified recipients"
+            "doc_result": doc_result['output'],
+            "email_results": email_results,
+            "recipients": email_list
         })
         
     except Exception as e:
@@ -104,4 +91,4 @@ def create_document():
         }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5002)
+    app.run(debug=True, port=5000)

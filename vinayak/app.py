@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import json
 from dotenv import load_dotenv
+from flask_cors import CORS
 
 # Load environment variables
 load_dotenv()
@@ -31,6 +32,9 @@ class EmailAnalyzer:
         """Perform comprehensive email analysis in a single Gemini call"""
         prompt = f"""
         Analyze this email comprehensively and return ONLY a JSON object with the following structure:
+        
+        Remember this carefully !!
+        If the mail mentions anything about a meeting then include it in the calendar segment and exclude it from the tasks segment.
 
         {{
             "nlp_analysis": {{
@@ -64,7 +68,7 @@ class EmailAnalyzer:
                 "red_flags": []
             }}
         }}
-
+        
         Fill in the above structure based on analyzing this email content: {self.email_content}
         For the sender email: {self.sender_email}
 
@@ -146,6 +150,7 @@ class EmailAnalyzer:
 
 # Create Flask app instance
 app = Flask(__name__)
+CORS(app)
 
 @executive_agent.route('/analyze_email', methods=['POST'])
 def analyze_email():

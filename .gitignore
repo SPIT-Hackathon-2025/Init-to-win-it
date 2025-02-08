@@ -2,7 +2,9 @@ myenv/
 services/tp.txt
 services/email_deamon/.env
 services/email_deamon/email_credentials.json
+services/email_deamon/credentials.json
 services/email_deamon/token.pickle
+services/email_deamon/.venv
 Asim/meet/.env
 Asim/test.txt
 Asim/meet/.composio.lock
