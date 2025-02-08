@@ -6,6 +6,7 @@ const Details = () => {
     const [apiKey, setApiKey] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const AUTH_BACKEND_URL = import.meta.env.VITE_GOOGLE_AUTH_SERVER;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -13,7 +14,7 @@ const Details = () => {
         setError('');
 
         try {
-            const response = await fetch('http://127.0.0.1:5000/api-auth', {  // Updated endpoint
+            const response = await fetch(`${AUTH_BACKEND_URL}/api-auth`, {  
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

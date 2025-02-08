@@ -1,6 +1,11 @@
 from flask import Flask, request, jsonify
 from composio import Composio, ComposioToolSet
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
@@ -9,7 +14,6 @@ CORS(app)
 def api_auth():
     try:
         # Get API key from request parameters
-        
         api_key = request.json.get('api_key')
         if not api_key:
             return jsonify({"error": "API key is required"}), 400
@@ -18,12 +22,12 @@ def api_auth():
         composio = Composio(api_key=api_key)
         gmail_app = composio.apps.get(name="gmail")
 
-        # Create integration
+        # Create integration using environment variables
         integration = composio.integrations.create(
             app_id=gmail_app.appId,
             auth_config={
-                "client_id": "96725622524-0v0n8jmolg92jf6lcciqnjqb0aljdoed.apps.googleusercontent.com",
-                "client_secret": "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",
+                "client_id": os.getenv('GOOGLE_CLIENT_ID'),
+                "client_secret": os.getenv('GOOGLE_CLIENT_SECRET'),
                 "oauth_redirect_uri": "https://backend.composio.dev/api/v1/auth-apps/add",
                 "scopes": "https://www.googleapis.com/auth/gmail.modify,https://www.googleapis.com/auth/userinfo.profile"
             },
@@ -49,4 +53,4 @@ def api_auth():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
