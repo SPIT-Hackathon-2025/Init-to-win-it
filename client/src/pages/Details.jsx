@@ -9,6 +9,8 @@ const Details = () => {
     const AUTH_BACKEND_URL = import.meta.env.VITE_GOOGLE_AUTH_SERVER;
 
     const handleSubmit = async (e) => {
+
+        localStorage.setItem('composio-api-key', apiKey);
         e.preventDefault();
         setIsLoading(true);
         setError('');
