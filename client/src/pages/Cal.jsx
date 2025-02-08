@@ -67,45 +67,8 @@ const Cal = () => {
     return JSON.stringify(output, null, 2);
   };
 
-  const ResponseDisplay = ({ title, response }) => {
-    const formattedResponse = formatResponse(response);
-    
-    return (
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        className="mt-6 p-4 bg-[#1a1a1a] rounded-lg border border-yellow-400/10"
-      >
-        <h3 className="text-yellow-400 font-medium mb-4">{title}:</h3>
-        <div className="prose prose-invert prose-yellow max-w-none">
-          <ReactMarkdown
-            components={{
-              p: ({ children }) => <p className="text-yellow-400/80 mb-2">{children}</p>,
-              ul: ({ children }) => <ul className="list-disc pl-4 mb-4 text-yellow-400/80">{children}</ul>,
-              li: ({ children }) => <li className="mb-1">{children}</li>,
-              a: ({ children, href }) => (
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-yellow-400 hover:text-yellow-300 underline"
-                >
-                  {children}
-                </a>
-              ),
-              strong: ({ children }) => <strong className="text-yellow-400 font-semibold">{children}</strong>,
-            }}
-          >
-            {formattedResponse || 'No response available'}
-          </ReactMarkdown>
-        </div>
-      </motion.div>
-    );
-  };
-
   return (
-    <div className="min-h-screen p-8 bg-[#0a0a0a]">
+    <div className="min-h-screen p-8">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header Section */}
         <motion.div
@@ -153,60 +116,97 @@ const Cal = () => {
               </div>
             </form>
 
-            {/* Initial Response Display */}
-            <AnimatePresence>
-              {initialResponse && (
-                <ResponseDisplay title="Availability Results" response={initialResponse} />
-              )}
-            </AnimatePresence>
+            {/* Simplified Initial Response Display without animations */}
+            {initialResponse && (
+              <div className="mt-6 p-4 bg-[#1a1a1a] rounded-lg border border-yellow-400/10">
+                <h3 className="text-yellow-400 font-medium mb-4">Availability Results:</h3>
+                <div className="prose prose-invert prose-yellow max-w-none">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => <p className="text-yellow-400/80 mb-2">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc pl-4 mb-4 text-yellow-400/80">{children}</ul>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                      a: ({ children, href }) => (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-yellow-400 hover:text-yellow-300 underline"
+                        >
+                          {children}
+                        </a>
+                      ),
+                      strong: ({ children }) => <strong className="text-yellow-400 font-semibold">{children}</strong>,
+                    }}
+                  >
+                    {formatResponse(initialResponse) || 'No response available'}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            )}
           </motion.div>
 
-          {/* Confirmation Section */}
-          <AnimatePresence>
-            {initialResponse && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="bg-[#131313] rounded-lg p-6 border border-yellow-400/20"
-              >
-                <h2 className="flex items-center gap-2 text-xl font-semibold text-yellow-400 mb-4">
-                  <FiCheck className="w-5 h-5" />
-                  Confirm Meeting
-                </h2>
-                <form onSubmit={handleFollowUp} className="space-y-4">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={followUpInput}
-                      onChange={(e) => setFollowUpInput(e.target.value)}
-                      placeholder="Type 'yes' to confirm or provide alternative suggestions..."
-                      className="w-full p-4 rounded-lg bg-[#1a1a1a] border-2 border-yellow-400/10 
-                        text-yellow-100 placeholder-yellow-600/30 focus:outline-none focus:border-yellow-400/40 
-                        transition-all duration-300"
-                    />
-                    <button
-                      type="submit"
-                      disabled={isLoading || !followUpInput.trim()}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 
-                        bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-400 rounded-md 
-                        transition-colors disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {isLoading ? 'Processing...' : 'Confirm'}
-                      <FiCheck size={16} />
-                    </button>
-                  </div>
-                </form>
+          {/* Simplified Confirmation Section without unnecessary animations */}
+          {initialResponse && (
+            <div className="bg-[#131313] rounded-lg p-6 border border-yellow-400/20">
+              <h2 className="flex items-center gap-2 text-xl font-semibold text-yellow-400 mb-4">
+                <FiCheck className="w-5 h-5" />
+                Confirm Meeting
+              </h2>
+              <form onSubmit={handleFollowUp} className="space-y-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={followUpInput}
+                    onChange={(e) => setFollowUpInput(e.target.value)}
+                    placeholder="Type 'yes' to confirm or provide alternative suggestions..."
+                    className="w-full p-4 rounded-lg bg-[#1a1a1a] border-2 border-yellow-400/10 
+                      text-yellow-100 placeholder-yellow-600/30 focus:outline-none focus:border-yellow-400/40 
+                      transition-all duration-300"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isLoading || !followUpInput.trim()}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 
+                      bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-400 rounded-md 
+                      transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isLoading ? 'Processing...' : 'Confirm'}
+                    <FiCheck size={16} />
+                  </button>
+                </div>
+              </form>
 
-                {/* Final Response Display */}
-                <AnimatePresence>
-                  {finalResponse && (
-                    <ResponseDisplay title="Final Status" response={finalResponse} />
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              {/* Final Response Display */}
+              {finalResponse && (
+                <div className="mt-6 p-4 bg-[#1a1a1a] rounded-lg border border-yellow-400/10">
+                  <h3 className="text-yellow-400 font-medium mb-4">Final Status:</h3>
+                  <div className="prose prose-invert prose-yellow max-w-none">
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p className="text-yellow-400/80 mb-2">{children}</p>,
+                        ul: ({ children }) => <ul className="list-disc pl-4 mb-4 text-yellow-400/80">{children}</ul>,
+                        li: ({ children }) => <li className="mb-1">{children}</li>,
+                        a: ({ children, href }) => (
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-yellow-400 hover:text-yellow-300 underline"
+                          >
+                            {children}
+                          </a>
+                        ),
+                        strong: ({ children }) => <strong className="text-yellow-400 font-semibold">{children}</strong>,
+                      }}
+                    >
+                      {formatResponse(finalResponse) || 'No response available'}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
