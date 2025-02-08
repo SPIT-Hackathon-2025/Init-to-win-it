@@ -89,7 +89,7 @@ const Dashboard = () => {
     
     // Split by numbered events and filter out non-event text
     const eventStrings = outputText.split(/\d+\.\s+(?:\*\*)?/).filter(str => 
-      str && !str.startsWith('Found') && !str.startsWith('Here') && !str.includes('Feel free')
+      str && !str.startsWith('I') && !str.startsWith('I found') &&!str.startsWith('Found') && !str.startsWith('Here') && !str.includes('Feel free')
     );
     
     return eventStrings.map(eventStr => {
