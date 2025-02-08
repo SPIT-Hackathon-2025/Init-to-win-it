@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
-from composio import Composio, ComposioToolSet
-from flask_cors import CORS
+from composio import Composio, ComposioToolSet # type: ignore
+from flask_cors import CORS # type: ignore
 from dotenv import load_dotenv
 import os
 

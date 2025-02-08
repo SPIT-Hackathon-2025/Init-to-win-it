@@ -21,61 +21,12 @@ const MainLayout = () => {
       emoji: '📊',
       description: 'Overview and analytics'
     },
-    { 
-      path: '/agents', 
-      icon: FaUsers, 
-      label: 'Specialized Agents',
-      emoji: '🤖',
-      description: 'Access specialized AI agents'
-    },
-    { 
-      path: '/market-trends', 
-      icon: FaChartBar, 
-      label: 'Market Trends',
-      emoji: '📊',
-      description: 'Real-time market analysis'
-    },
-    { 
-      path: '/ad-generator', 
-      icon: FaMagic, 
-      label: 'Ad Generator',
-      emoji: '✨',
-      description: 'Create engaging ad campaigns'
-    },
-    { 
-      path: '/post-generate', 
-      icon: MessageSquare, 
-      label: 'Post Generator',
+    {
+      path: '/tracking',
+      icon: MessageSquare,
+      label: 'Live Logs',
       emoji: '📝',
-      description: 'Generate social media posts'
-    },
-    { 
-      path: '/ab-testing', 
-      icon: FaChartBar, 
-      label: 'A/B Testing',
-      emoji: '🔬',
-      description: 'Test campaign performance'
-    },
-    // { 
-    //   path: '/chat', 
-    //   icon: MessageSquare, 
-    //   label: 'AI Assistant',
-    //   emoji: '💬',
-    //   description: 'Chat with AI Assistant'
-    // },
-    { 
-      path: '/ai-strategist', 
-      icon: FaMagic, 
-      label: 'AI Strategist',
-      emoji: '🧠',
-      description: 'Strategic campaign planning'
-    },
-    { 
-      path: '/specialized-agents', 
-      icon: FaUsers, 
-      label: 'Agent Hub',
-      emoji: '🌟',
-      description: 'Specialized agent interface'
+      description: 'Real-time logs and messages',
     }
   ];
 
@@ -98,7 +49,7 @@ const MainLayout = () => {
         </div>
 
         {/* Added max-height and overflow-auto to nav */}
-        <nav className="flex-1 mt-2 px-2 overflow-auto">
+        <nav className="flex-1 mt-10 px-2 overflow-auto">
           <div className="space-y-0.5 pb-14"> {/* Reduced gap between items and added bottom padding */}
             {navItems.map(({ path, icon: Icon, label, emoji, description }) => (
               <Link
@@ -136,7 +87,7 @@ const MainLayout = () => {
 
       {/* Adjusted margin to match new sidebar width */}
       <div className="flex-1 ml-0 lg:ml-64">
-        <header className="h-16 bg-zinc-800/50 backdrop-blur-md border-b border-zinc-700/50 shadow-sm flex items-center px-6 sticky top-0 z-40">
+        <header className="h-14 bg-zinc-800/50 backdrop-blur-md border-b border-zinc-700/50 shadow-sm flex items-center px-6 sticky top-0 z-40">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 rounded-full hover:bg-zinc-700/50 transition-all lg:hidden"
