@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiCalendar, FiSend } from 'react-icons/fi';
+import { FiCalendar, FiSend, FiClock } from 'react-icons/fi';
 import { SiNotion } from 'react-icons/si';
+import { BsKanban } from 'react-icons/bs';
 
 const Dashboard = () => {
   const [greeting, setGreeting] = useState('');
@@ -11,6 +12,8 @@ const Dashboard = () => {
   const textAreaRef = useRef(null);
   const [events, setEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [tasksLoading, setTasksLoading] = useState(false);
 
   // Add API key constant (replace with your actual API key)
   const API_KEY = import.meta.env.VITE_COMPOSIO_API_KEY;  // Add this line
@@ -29,6 +32,7 @@ const Dashboard = () => {
     else if (hour < 18) setGreeting('Good Afternoon');
     else setGreeting('Good Evening');
     fetchEvents();
+    fetchTasks(); // Add this line
   }, []);
 
   const handleSubmit = async (e) => {
@@ -84,6 +88,19 @@ const Dashboard = () => {
     }
   };
 
+  const fetchTasks = async () => {
+    setTasksLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:8080/api/tasks/recent');
+      const data = await response.json();
+      setTasks(data.tasks);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    } finally {
+      setTasksLoading(false);
+    }
+  };
+
   const parseEventsData = (outputText) => {
     if (!outputText) return [];
     
@@ -109,7 +126,7 @@ const Dashboard = () => {
           ...(text.match(directMeetLinkRegex) || [])
         ];
         
-        return matches[0]; // Return the first valid meet link found
+        return matches[0];
       };
 
       // Process each line for details
@@ -236,6 +253,109 @@ const Dashboard = () => {
           {events.map((event, index) => renderEventCard(event, index))}
           {events.length === 0 && !eventsLoading && (
             <p className="text-center text-yellow-400/60 py-8">No upcoming events</p>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+
+  const getStatusColor = (status) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'bg-green-400/20 text-green-400 border-green-400/20';
+      case 'in progress':
+        return 'bg-yellow-400/20 text-yellow-400 border-yellow-400/20';
+      default:
+        return 'bg-red-400/20 text-red-400 border-red-400/20';
+    }
+  };
+
+  const getCategoryIcon = (category) => {
+    switch (category.toLowerCase()) {
+      case 'marketing':
+        return '📢';
+      case 'development':
+        return '💻';
+      case 'design':
+        return '🎨';
+      case 'documentation':
+        return '📝';
+      default:
+        return '📌';
+    }
+  };
+
+  const renderTasksSection = () => (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="bg-[#131313] backdrop-blur-lg rounded-lg p-6 border border-yellow-400/20"
+    >
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <BsKanban className="text-yellow-400 w-6 h-6" />
+          <h2 className="text-2xl font-semibold text-yellow-400">Your Tasks</h2>
+        </div>
+        <button 
+          onClick={fetchTasks}
+          className="px-3 py-1 text-sm bg-yellow-400/10 hover:bg-yellow-400/20 
+            text-yellow-400 rounded-md transition-colors"
+        >
+          Refresh
+        </button>
+      </div>
+
+      {tasksLoading ? (
+        <div className="flex justify-center py-8">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-6 h-6 border-2 border-yellow-400 border-t-transparent rounded-full"
+          />
+        </div>
+      ) : (
+        <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-yellow-400/20 scrollbar-track-transparent">
+          {tasks.map((task, index) => (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              key={index}
+              className="p-4 rounded-lg bg-yellow-400/5 border border-yellow-400/10 
+                hover:border-yellow-400/30 transition-all duration-300 group hover:bg-yellow-400/10"
+            >
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">{getCategoryIcon(task.Category)}</span>
+                    <h3 className="text-yellow-100 font-medium">{task.Name}</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    <span className={`text-xs px-2 py-1 rounded-full border ${getStatusColor(task.Status)}`}>
+                      {task.Status}
+                    </span>
+                    <span className="text-xs px-2 py-1 rounded-full bg-yellow-400/10 text-yellow-400 border border-yellow-400/20">
+                      {task.Category}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  <span className={`text-xs px-2 py-1 rounded-full 
+                    ${task.Priority.toLowerCase() === 'high' ? 'bg-red-400/20 text-red-400' : 
+                    task.Priority.toLowerCase() === 'medium' ? 'bg-yellow-400/20 text-yellow-400' : 
+                    'bg-green-400/20 text-green-400'}`}>
+                    {task.Priority}
+                  </span>
+                  <div className="flex items-center gap-1 text-yellow-400/60 text-sm">
+                    <FiClock className="w-4 h-4" />
+                    <span>{task.Deadline}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+          {tasks.length === 0 && !tasksLoading && (
+            <p className="text-center text-yellow-400/60 py-8">No tasks found</p>
           )}
         </div>
       )}
@@ -384,42 +504,7 @@ const Dashboard = () => {
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {renderScheduleSection()}
-          {/* Tasks Column */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-[#131313] backdrop-blur-lg rounded-lg p-6 border border-yellow-400/20"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <SiNotion className="text-yellow-400 w-6 h-6" />
-              <h2 className="text-2xl font-semibold text-yellow-400">Your Tasks</h2>
-            </div>
-            <div className="space-y-4">
-              {mockTasks.map((task, index) => (
-                <div
-                  key={index}
-                  className="p-3 rounded-lg bg-yellow-400/5 border border-yellow-400/10 
-                    hover:border-yellow-400/30 transition-colors"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <p className="text-yellow-100 font-medium">{task.title}</p>
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        task.priority === 'High'
-                          ? 'bg-red-400/20 text-red-400'
-                          : task.priority === 'Medium'
-                          ? 'bg-yellow-400/20 text-yellow-400'
-                          : 'bg-green-400/20 text-green-400'
-                      }`}
-                    >
-                      {task.priority}
-                    </span>
-                  </div>
-                  <p className="text-yellow-400/60 text-sm">{task.status}</p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          {renderTasksSection()}
         </div>
       </motion.div>
     </div>

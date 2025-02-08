@@ -18,6 +18,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import json
 import logging
 from pathlib import Path
+from flask_cors import CORS 
 
 # Configure logging
 logging.basicConfig(
@@ -34,6 +35,8 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
+
 
 # Initialize LangChain and Composio components
 llm = ChatOpenAI()
