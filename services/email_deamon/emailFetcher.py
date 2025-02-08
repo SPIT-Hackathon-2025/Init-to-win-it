@@ -8,6 +8,7 @@ from googleapiclient.discovery import build
 from pymongo import MongoClient
 import pickle
 import datetime
+import base64  # added import
 
 # Load environment variables
 load_dotenv()
@@ -114,6 +115,20 @@ class GmailMonitor:
                     tz=datetime.timezone.utc
                 )
                 
+                # Extract full email content from payload
+                payload = msg.get('payload', {})
+                full_body = ""
+                if 'parts' in payload:
+                    for part in payload['parts']:
+                        if part.get('mimeType', '').startswith('text/'):
+                            data = part.get('body', {}).get('data', '')
+                            if data:
+                                full_body += base64.urlsafe_b64decode(data.encode('UTF-8')).decode('utf-8', errors='replace')
+                else:
+                    data = payload.get('body', {}).get('data', '')
+                    if data:
+                        full_body = base64.urlsafe_b64decode(data.encode('UTF-8')).decode('utf-8', errors='replace')
+                
                 # Store only if not already in database
                 if not self.emails.find_one({'message_id': message['id']}):
                     email_doc = {
@@ -123,7 +138,8 @@ class GmailMonitor:
                         'received_at': received_date,
                         'stored_at': datetime.datetime.now(datetime.timezone.utc),
                         'snippet': msg.get('snippet', ''),
-                        'labels': msg.get('labelIds', [])
+                        'labels': msg.get('labelIds', []),
+                        'body': full_body  # added full email content
                     }
                     self.emails.insert_one(email_doc)
                     print(f"New email stored: {subject} (received at {received_date})")
