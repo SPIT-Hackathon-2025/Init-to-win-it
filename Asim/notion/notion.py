@@ -236,6 +236,8 @@ def generate_ai_insights(df):
            - Team collaboration recommendations
            - Productivity enhancement strategies
 
+        use emojies 
+        
         Format the response in HTML with proper headers and bullet points.
         """
         
@@ -655,6 +657,28 @@ def show_graphs():
         )
     except Exception as e:
         logger.error(f"Error rendering graphs: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/tasks/recent', methods=['GET'])
+def get_recent_tasks():
+    """Get the 5 most recently added tasks"""
+    try:
+        if not os.path.exists(CSV_FILE_PATH):
+            return jsonify({'error': 'No tasks found'}), 404
+        
+        # Read CSV and get last 5 rows
+        df = pd.read_csv(CSV_FILE_PATH)
+        last_five = df.tail(5).to_dict('records')
+        
+        # Format the response
+        response = {
+            'count': len(last_five),
+            'tasks': last_five
+        }
+        
+        return jsonify(response), 200
+    except Exception as e:
+        logger.error(f"Error fetching recent tasks: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 # Error handlers
