@@ -3,3 +3,6 @@ services/tp.txt
 services/email_deamon/.env
 services/email_deamon/email_credentials.json
 services/email_deamon/token.pickle
+Asim/meet/.env
+Asim/test.txt
+Asim/meet/.composio.lock
