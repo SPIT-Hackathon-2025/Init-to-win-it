@@ -18,7 +18,7 @@ const Meet = () => {
     setIsLoading(true);
     const id = extractMeetId(meetId);
     try {
-      const response = await fetch(`http://10.10.120.133:5050/getAnalysis/${id}`);
+      const response = await fetch(`http://localhost:5050/getAnalysis/${id}`);
       const data = await response.json();
       
       // Random delay between 5 and 19 seconds
@@ -37,7 +37,7 @@ const Meet = () => {
     setIsSharing(true);
     const id = extractMeetId(meetId);
     try {
-      const response = await fetch(`http://10.10.120.133:5050/share/${id}`, {
+      const response = await fetch(`http://localhost:5050/share/${id}`, {
         method: 'POST',
       });
       const data = await response.json();
