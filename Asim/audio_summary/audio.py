@@ -236,26 +236,55 @@ def generate_meeting_summary(transcript):
         logger.error(f"Error generating summary: {str(e)}")
         raise
 
-def generate_meeting_minutes(transcript):
-    """Generate formal meeting minutes using Gemini"""
+def generate_meeting_minutes(transcript, meeting_details):
+    """Generate formal meeting minutes using Gemini with meeting details"""
     try:
-        minutes_prompt = f"""
-        Create formal meeting minutes from this transcript including:
+        # Format meeting details
+        start_time = datetime.strptime(meeting_details.get('start_time', ''), "%Y-%m-%dT%H:%M:%SZ")
+        end_time = datetime.strptime(meeting_details.get('end_time', ''), "%Y-%m-%dT%H:%M:%SZ")
+        duration = (end_time - start_time).total_seconds() / 60  # in minutes
         
-        1. Date and Duration
-        2. Attendees
-        3. Agenda Items Covered
-        4. Discussion Points
-        5. Action Items and Owners
+        participants = meeting_details.get('participants', [])
+        attendee_list = "\n".join([
+            f"- {p['name']} (Joined: {p['join_time']}, Left: {p['leave_time']})"
+            for p in participants
+        ])
+
+        minutes_prompt = f"""
+        Create formal meeting minutes using the following details:
+        
+        Meeting Date: {start_time.strftime('%B %d, %Y')}
+        Start Time: {start_time.strftime('%I:%M %p')}
+        End Time: {end_time.strftime('%I:%M %p')}
+        Duration: {duration:.0f} minutes
+        
+        Attendees:
+        {attendee_list}
+        
+        Please include:
+        1. Meeting Overview
+        2. Agenda Items Covered
+        3. Discussion Points
+        4. Action Items and Owners
+        5. Next Steps
         6. Next Meeting (if mentioned)
         
-        Format it professionally as meeting minutes.
-        
-        Transcript: {transcript}
+        Use this transcript to generate the minutes:
+        {transcript}
         """
         
         minutes = llm.invoke(minutes_prompt)
-        return minutes
+        return {
+            'formatted_minutes': minutes,
+            'metadata': {
+                'date': start_time.strftime('%Y-%m-%d'),
+                'start_time': start_time.isoformat(),
+                'end_time': end_time.isoformat(),
+                'duration_minutes': duration,
+                'participant_count': len(participants),
+                'participants': participants
+            }
+        }
     except Exception as e:
         logger.error(f"Error generating minutes: {str(e)}")
         raise
@@ -300,6 +329,7 @@ def analyze_meeting(meet_id):
         if not meeting:
             return jsonify({'error': 'Meeting not found'}), 404
         
+        # Handle transcription if needed
         transcript = meeting.get('transcript')
         if not transcript:
             logger.info(f"No transcript found, attempting transcription for meet_id: {meet_id}")
@@ -319,29 +349,51 @@ def analyze_meeting(meet_id):
             )
             logger.info(f"Transcription completed and saved for meet_id: {meet_id}")
         
-        # Generate analysis
+        # Store participants in separate collection
+        participants_collection = db['meeting_participants']
+        participant_doc = {
+            'meet_id': meet_id,
+            'timestamp': datetime.utcnow(),
+            'participants': meeting.get('participants', []),
+            'total_participants': len(meeting.get('participants', [])),
+            'duration_minutes': meeting.get('duration_minutes', 0)
+        }
+        participants_collection.insert_one(participant_doc)
+        
+        # Generate analysis with complete meeting details
         summary = generate_meeting_summary(transcript)
-        minutes = generate_meeting_minutes(transcript)
+        minutes = generate_meeting_minutes(transcript, meeting)
         sentiment = analyze_sentiment(transcript)
         
-        # Create analysis document
+        # Create comprehensive analysis document
         analysis = {
             'meet_id': meet_id,
             'timestamp': datetime.utcnow(),
-            'transcript': transcript,  # Include transcript in analysis
+            'meeting_details': {
+                'start_time': meeting.get('start_time'),
+                'end_time': meeting.get('end_time'),
+                'duration_minutes': meeting.get('duration_minutes'),
+                'host': meeting.get('host'),
+                'title': meeting.get('title'),
+                'participant_count': len(meeting.get('participants', []))
+            },
+            'transcript': transcript,
             'summary': summary,
             'minutes': minutes,
-            'sentiment_analysis': sentiment
+            'sentiment_analysis': sentiment,
+            'participants': participant_doc
         }
         
-        # Store in database
+        # Store analysis
         analysis_collection.insert_one(analysis)
         logger.info(f"Analysis completed and stored for meet_id: {meet_id}")
         
         return jsonify({
             'message': 'Analysis completed successfully',
             'meet_id': meet_id,
-            'transcript_preview': transcript[:200] + '...' if len(transcript) > 200 else transcript
+            'transcript_preview': transcript[:200] + '...' if len(transcript) > 200 else transcript,
+            'participant_count': len(meeting.get('participants', [])),
+            'duration_minutes': meeting.get('duration_minutes', 0)
         })
         
     except Exception as e:
