@@ -41,6 +41,13 @@ const MainLayout = () => {
       label: 'Notion AI',
       emoji: '📖',
       description: 'Seamless Notion Integration' ,
+    },
+    {
+      path: '/meet',
+      icon: FaUsers,
+      label: 'Meet Analysis',
+      emoji: '🎤',
+      description: 'Get the analysis of your meetings',
     }
 
   ];
