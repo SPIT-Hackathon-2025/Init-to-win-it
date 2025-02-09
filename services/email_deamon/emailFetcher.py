@@ -9,6 +9,7 @@ from pymongo import MongoClient
 import pickle
 import datetime
 import base64  # added import
+import requests  # added import
 
 # Load environment variables
 load_dotenv()
@@ -31,6 +32,9 @@ class GmailMonitor:
         
         # Initialize last check timestamp
         self.initialize_timestamp()
+
+        # Analysis endpoint
+        self.ANALYSIS_ENDPOINT = 'http://127.0.0.1:5009/analyze_email'
 
     def initialize_timestamp(self):
         """Initialize or get the last check timestamp from MongoDB"""
@@ -75,6 +79,50 @@ class GmailMonitor:
 
         return build('gmail', 'v1', credentials=creds)
 
+    def get_email_analysis(self, email_content, sender_email):
+        print("Getting email analysis...")
+        print(email_content, sender_email)
+        """Get email analysis from the analysis service"""
+        try:
+            response = requests.post(
+                self.ANALYSIS_ENDPOINT,
+                json={
+                    "email_content": email_content,
+                    "sender_email": sender_email
+                }
+            )
+            if response.status_code == 200:
+                return response.json()
+            print(f"Analysis failed with status code: {response.status_code}")
+            return None
+        except Exception as e:
+            print(f"Error getting email analysis: {str(e)}")
+            return None
+
+    def extract_email_body(self, payload):
+        """Extract email body recursively from payload parts"""
+        if not payload:
+            return ""
+
+        body = ""
+        
+        # If this part has a body with data, decode it
+        if 'body' in payload and 'data' in payload['body']:
+            try:
+                body += base64.urlsafe_b64decode(payload['body']['data'].encode('UTF-8')).decode('utf-8', errors='replace')
+            except Exception as e:
+                print(f"Error decoding body: {str(e)}")
+
+        # If this part has sub-parts, process them recursively
+        if 'parts' in payload:
+            for part in payload['parts']:
+                if part.get('mimeType', '').startswith('text/'):
+                    body += self.extract_email_body(part)
+                elif part.get('parts'):  # Handle nested multipart messages
+                    body += self.extract_email_body(part)
+
+        return body
+
     def fetch_new_emails(self):
         try:
             service = self.get_gmail_service()
@@ -115,19 +163,15 @@ class GmailMonitor:
                     tz=datetime.timezone.utc
                 )
                 
-                # Extract full email content from payload
-                payload = msg.get('payload', {})
-                full_body = ""
-                if 'parts' in payload:
-                    for part in payload['parts']:
-                        if part.get('mimeType', '').startswith('text/'):
-                            data = part.get('body', {}).get('data', '')
-                            if data:
-                                full_body += base64.urlsafe_b64decode(data.encode('UTF-8')).decode('utf-8', errors='replace')
-                else:
-                    data = payload.get('body', {}).get('data', '')
-                    if data:
-                        full_body = base64.urlsafe_b64decode(data.encode('UTF-8')).decode('utf-8', errors='replace')
+                # Extract full email content using the new method
+                full_body = self.extract_email_body(msg['payload'])
+                
+                # Debug print
+                print("Extracted email body:", full_body[:200], "...")  # Print first 200 chars
+                
+                # Get email analysis before storing
+                print(full_body, sender)
+                analysis_result = self.get_email_analysis(full_body, sender)
                 
                 # Store only if not already in database
                 if not self.emails.find_one({'message_id': message['id']}):
@@ -139,10 +183,11 @@ class GmailMonitor:
                         'stored_at': datetime.datetime.now(datetime.timezone.utc),
                         'snippet': msg.get('snippet', ''),
                         'labels': msg.get('labelIds', []),
-                        'body': full_body  # added full email content
+                        'full_body': full_body,  # Store as full_body instead of body
+                        'analysis': analysis_result  # Add the analysis result
                     }
                     self.emails.insert_one(email_doc)
-                    print(f"New email stored: {subject} (received at {received_date})")
+                    print(f"New email stored with analysis: {subject}")
             
             # Update the timestamp after successful fetch
             self.update_timestamp()

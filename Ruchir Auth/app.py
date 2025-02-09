@@ -10,16 +10,34 @@ from datetime import datetime
 from composio_langchain import ComposioToolSet, Action, App
 from datetime import datetime
 from dotenv import load_dotenv
-
+from pymongo import MongoClient
 
 # Load environment variables
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+MONGO_URL = os.getenv('MONGO_URL')  # Add this line
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
+# Initialize MongoDB connection with error handling and retry logic
+def get_database():
+    try:
+        mongo_url = os.getenv('MONGO_URI')
+        if not mongo_url:
+            raise ValueError("MONGO_URL not found in environment variables")
+            
+        client = MongoClient(mongo_url, serverSelectionTimeoutMS=5000)
+        # Force a connection to verify it works
+        client.server_info()
+        return client.get_database("email_db")
+    except Exception as e:
+        print(f"MongoDB Connection Error: {e}")
+        return None
+
+# Initialize Flask app and database
 app = Flask(__name__)
 CORS(app)
+db = get_database()
 
 @app.route('/api-auth', methods=['POST'])
 def api_auth():
@@ -88,6 +106,33 @@ def get_events():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/get-maildb', methods=['GET'])
+def get_maildb():
+    try:
+        if db is None:  # Changed from 'if not db' to 'if db is None'
+            return jsonify({
+                "status": "error",
+                "message": "Database connection not available"
+            }), 500
+
+        # Get the collection
+        collection = db.emails
+        
+        # Fetch all documents from the collection
+        documents = list(collection.find({}, {'_id': 0}))
+        
+        return jsonify({
+            "status": "success",
+            "count": len(documents),
+            "data": documents
+        })
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

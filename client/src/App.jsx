@@ -7,6 +7,9 @@ import Login from './pages/Login';
 import MainLayout from './layouts/MainLayout';
 import Details from './pages/Details';
 import LiveTracker from './pages/LiveTracker';
+import Cal from './pages/Cal';
+import NotionAIDashboard from './pages/notion';
+
 
 const App = () => {
   return (
@@ -21,6 +24,9 @@ const App = () => {
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/tracking" element={<LiveTracker />} />
+            <Route path="/calender" element={<Cal />} />
+            <Route path="/notion" element={<NotionAIDashboard />} />
+
           </Route>
         </Routes>
       </div>

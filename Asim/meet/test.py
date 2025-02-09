@@ -9,11 +9,13 @@ import pytz
 from dotenv import load_dotenv
 import re
 from pymongo import MongoClient
+from flask_cors import CORS  # Add this import
 
 load_dotenv()
 
 app = Flask(__name__)
-os.environ["OPENAI_API_KEY"] = "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"
+CORS(app)
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
 # MongoDB connection setup
 client = MongoClient(os.getenv("MONGODB_URI"))
@@ -144,6 +146,7 @@ scheduler = MeetingScheduler(openai_api_key=os.getenv("OPENAI_API_KEY"))
 def schedule_meeting():
     try:
         data = request.json
+        print(data.get('prompt'))
         if not data or 'prompt' not in data:
             return jsonify({
                 "status": "error",

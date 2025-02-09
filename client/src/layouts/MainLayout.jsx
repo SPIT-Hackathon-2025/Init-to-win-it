@@ -27,6 +27,13 @@ const MainLayout = () => {
       label: 'Live Logs',
       emoji: '📝',
       description: 'Real-time logs and messages',
+    },
+    {
+      path: '/calender',
+      icon: FaUsers,
+      label: 'Calender Agent',
+      emoji: '📅',
+      description: 'Schedule and manage meetings',
     }
   ];
 
@@ -80,7 +87,7 @@ const MainLayout = () => {
           <div className="flex items-center justify-center space-x-1 text-xs text-zinc-400">
             <span>Made with</span>
             <span className="text-red-500">❤️</span>
-            <span>by Team Init.io</span>
+            <span>by Team Init to Win It</span>
           </div>
         </div>
       </div>
