@@ -32,6 +32,7 @@ from langchain_openai import ChatOpenAI
 from composio_langchain import ComposioToolSet
 import os
 from datetime import datetime
+from flask_cors import CORS
 
 # Load environment variables
 load_dotenv()
@@ -69,6 +70,7 @@ class CustomJSONProvider(DefaultJSONProvider):
             return str(obj)
 
 app = Flask(__name__)
+CORS(app)
 app.json = CustomJSONProvider(app)
 app.config['TIMEOUT'] = 600  # 10 minutes in seconds
 
