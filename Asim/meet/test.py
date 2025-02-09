@@ -146,6 +146,7 @@ scheduler = MeetingScheduler(openai_api_key=os.getenv("OPENAI_API_KEY"))
 def schedule_meeting():
     try:
         data = request.json
+        print(data.get('prompt'))
         if not data or 'prompt' not in data:
             return jsonify({
                 "status": "error",
