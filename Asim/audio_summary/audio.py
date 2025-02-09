@@ -569,4 +569,4 @@ def share_analysis(meet_id):
 
 if __name__ == '__main__':
     logger.info("Starting Meeting Analysis Server...")
-    app.run(debug=True, port=5050)
+    app.run(debug=True, port=5050, host='0.0.0.0')
