@@ -16,3 +16,8 @@ Asim/notion/notion_mock_tasks.csv
 Asim/notion/analysis_results.json
 Asim/notion/app.log
 Asim/notion/templates/
+testing/
+audio/
+Asim/audio_summary/audio_server.log
+Asim/audio_summary/.env
+Asim/audio_summary/meeting_service.log
