@@ -49,7 +49,7 @@ const LiveTracker = () => {
           endpoint = 'http://127.0.0.1:8080/tasks'; // Your Notion endpoint
           break;
         case 'calendar':
-          endpoint = 'http://127.0.0.1:5004/meet'; // Your Calendar endpoint
+          endpoint = 'http://127.0.0.1:5004/execute'; // Your Calendar endpoint
           break;
         default:
           console.warn('Unknown email type');

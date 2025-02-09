@@ -9,6 +9,7 @@ import Details from './pages/Details';
 import LiveTracker from './pages/LiveTracker';
 import Cal from './pages/Cal';
 import NotionAIDashboard from './pages/notion';
+import YourInteractions from './pages/YourInteractions';
 
 
 const App = () => {
@@ -26,6 +27,7 @@ const App = () => {
             <Route path="/tracking" element={<LiveTracker />} />
             <Route path="/calender" element={<Cal />} />
             <Route path="/notion" element={<NotionAIDashboard />} />
+            <Route path="/interactions" element={<YourInteractions />} />
 
           </Route>
         </Routes>

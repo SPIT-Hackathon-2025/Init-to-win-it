@@ -22,7 +22,7 @@ os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 # Initialize MongoDB connection with error handling and retry logic
 def get_database():
     try:
-        mongo_url = os.getenv('MONGO_URI')
+        mongo_url = os.getenv('MONGO_URL')
         if not mongo_url:
             raise ValueError("MONGO_URL not found in environment variables")
             
@@ -116,6 +116,7 @@ def get_maildb():
                 "message": "Database connection not available"
             }), 500
 
+        print(db)
         # Get the collection
         collection = db.emails
         

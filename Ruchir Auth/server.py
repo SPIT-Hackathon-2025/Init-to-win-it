@@ -6,7 +6,10 @@ from composio_langchain import ComposioToolSet
 import os
 from dotenv import load_dotenv
 from flask_cors import CORS
+from pymongo import MongoClient
 import re
+from bson import json_util
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -85,6 +88,67 @@ def create_document():
         })
         
     except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+    
+def get_database():
+    try:
+        mongo_url = os.getenv('MONGO_URL')
+        if not mongo_url:
+            raise ValueError("MONGO_URI not found in environment variables")
+            
+        client = MongoClient(mongo_url, serverSelectionTimeoutMS=5000)
+        # Force a connection to verify it works
+        client.server_info()
+        print("MongoDB connected successfully")  # Debug print
+        return client.get_database("SPIT_HACK")
+    except Exception as e:
+        print(f"MongoDB Connection Error: {e}")
+        return None
+
+db = get_database()
+print(db)
+
+@app.route('/get-user-records', methods=['GET'])
+def get_user_records():
+    print("Starting get_user_records function")  # Debug print
+    try:
+        if db is None:
+            return jsonify({
+                "status": "error",
+                "message": "Database connection not available"
+            }), 500
+
+        # Print available collections
+        print("Available collections:", db.list_collection_names())  # Debug print
+        
+        # Get the user_data collection
+        collection = db.user_data
+        
+        # Print total documents in collection
+        print("Total documents in collection:", collection.count_documents({}))  # Debug print
+        
+        # Fetch all documents and handle ObjectId serialization
+        user_records = json.loads(json_util.dumps(list(collection.find({"user_id": "U024"}))))
+
+        print("Found records:", len(user_records))  # Debug print
+
+        # if db != None:
+        #     db.client.close()
+        #     print("MongoDB connection closed")
+
+        return jsonify({
+            "status": "success",
+            "count": len(user_records),
+            "data": user_records
+        })
+        
+        
+
+    except Exception as e:
+        print(f"Error in get_user_records: {str(e)}")  # Debug print
         return jsonify({
             "status": "error",
             "message": str(e)

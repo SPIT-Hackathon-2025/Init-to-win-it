@@ -293,7 +293,7 @@ DETAILS: [relevant details like time, participants, etc.]
     
 
 @app.route('/execute', methods=['POST'])
-def meeting_followup():
+def meeting_execute():
     try:
         print("hi")
         data = request.json
