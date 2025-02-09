@@ -18,11 +18,13 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.cluster import KMeans
 from keras.models import Sequential
 from keras.layers import Dense
+from flask_cors import CORS
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 
 # Initialize MongoDB connection
 client = MongoClient(os.getenv('MONGODB_URI'))

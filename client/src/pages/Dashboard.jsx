@@ -17,7 +17,7 @@ const Dashboard = () => {
 
   // Add API key constant (replace with your actual API key)
   const API_KEY = import.meta.env.VITE_COMPOSIO_API_KEY;  // Add this line
-  
+
   // // Add mockTasks definition
   const mockTasks = [
     { title: 'Review Q4 Marketing Strategy', status: 'In Progress', priority: 'High' },
@@ -103,42 +103,42 @@ const Dashboard = () => {
 
   const parseEventsData = (outputText) => {
     if (!outputText) return [];
-    
+
     // Split by numbered events and filter out non-event text
-    const eventStrings = outputText.split(/\d+\.\s+(?:\*\*)?/).filter(str => 
-      str && !str.startsWith('I') && !str.startsWith('I found') &&!str.startsWith('Found') && !str.startsWith('Here') && !str.includes('Feel free')
+    const eventStrings = outputText.split(/\d+\.\s+(?:\*\*)?/).filter(str =>
+      str && !str.startsWith('I') && !str.startsWith('I found') && !str.startsWith('Found') && !str.startsWith('Here') && !str.includes('Feel free')
     );
-    
+
     return eventStrings.map(eventStr => {
       const lines = eventStr.split('\n').map(line => line.trim()).filter(Boolean);
       const details = {};
-      
+
       // Extract title from first line
       const title = lines[0].replace(/\*\*/g, '').trim();
-      
+
       // Function to find and extract meeting links
       const findMeetLinks = (text) => {
         const meetLinkRegex = /\[.*?\]\((https:\/\/meet\.google\.com\/[a-z-]+)\)/gi;
         const directMeetLinkRegex = /(https:\/\/meet\.google\.com\/[a-z-]+)/gi;
-        
+
         const matches = [
           ...(text.match(meetLinkRegex) || []).map(link => link.match(/\((.*?)\)/)[1]),
           ...(text.match(directMeetLinkRegex) || [])
         ];
-        
+
         return matches[0];
       };
 
       // Process each line for details
       lines.slice(1).forEach(line => {
         const cleanLine = line.replace(/^\s*-\s*|\*\*/g, '').trim();
-        
+
         // Check for meet links in the current line
         const meetLink = findMeetLinks(line);
         if (meetLink) {
           details.meetLink = meetLink;
         }
-        
+
         // Extract other details
         if (cleanLine.includes('Date:')) {
           details.date = cleanLine.split('Date:')[1].trim();
@@ -231,7 +231,7 @@ const Dashboard = () => {
           <FiCalendar className="text-yellow-400 w-6 h-6" />
           <h2 className="text-2xl font-semibold text-yellow-400">Your Schedule</h2>
         </div>
-        <button 
+        <button
           onClick={fetchEvents}
           className="px-3 py-1 text-sm bg-yellow-400/10 hover:bg-yellow-400/20 
             text-yellow-400 rounded-md transition-colors"
@@ -239,7 +239,7 @@ const Dashboard = () => {
           Refresh
         </button>
       </div>
-      
+
       {eventsLoading ? (
         <div className="flex justify-center py-8">
           <motion.div
@@ -290,13 +290,14 @@ const Dashboard = () => {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       className="bg-[#131313] backdrop-blur-lg rounded-lg p-6 border border-yellow-400/20"
+      onClick={() => window.open('https://www.notion.so/194017e1ad4d81d597f4c30cec36fdc6?v=194017e1ad4d81a8962c000c13e4a0e3', '_blank', 'noopener,noreferrer')}
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <BsKanban className="text-yellow-400 w-6 h-6" />
           <h2 className="text-2xl font-semibold text-yellow-400">Your Tasks</h2>
         </div>
-        <button 
+        <button
           onClick={fetchTasks}
           className="px-3 py-1 text-sm bg-yellow-400/10 hover:bg-yellow-400/20 
             text-yellow-400 rounded-md transition-colors"
@@ -341,9 +342,9 @@ const Dashboard = () => {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <span className={`text-xs px-2 py-1 rounded-full 
-                    ${task.Priority.toLowerCase() === 'high' ? 'bg-red-400/20 text-red-400' : 
-                    task.Priority.toLowerCase() === 'medium' ? 'bg-yellow-400/20 text-yellow-400' : 
-                    'bg-green-400/20 text-green-400'}`}>
+                    ${task.Priority.toLowerCase() === 'high' ? 'bg-red-400/20 text-red-400' :
+                      task.Priority.toLowerCase() === 'medium' ? 'bg-yellow-400/20 text-yellow-400' :
+                        'bg-green-400/20 text-green-400'}`}>
                     {task.Priority}
                   </span>
                   <div className="flex items-center gap-1 text-yellow-400/60 text-sm">
@@ -380,12 +381,12 @@ const Dashboard = () => {
         >
           <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-yellow-500/10 to-yellow-400/10 blur-xl" />
           <motion.div
-            animate={{ 
+            animate={{
               // y: [0, -8, 0],
               scale: [1, 1.0001, 1],
             }}
-            transition={{ 
-              repeat: Infinity, 
+            transition={{
+              repeat: Infinity,
               duration: 3,
               ease: 'linear'
             }}

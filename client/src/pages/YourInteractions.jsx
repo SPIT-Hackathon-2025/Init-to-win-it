@@ -7,11 +7,12 @@ import {
 import { FiClock, FiCheck, FiAlertCircle, FiActivity, FiBarChart2 } from 'react-icons/fi';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import SuggestionsPanel from '../components/SuggestionsPanel';
 
 const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD'];
 
 const StatCard = ({ title, value, icon, color }) => (
-    <div className="bg-gray-800/50 rounded-xl p-6 border border-yellow-400/20">
+    <div className="rounded-xl p-6 border border-yellow-400/20">
         <div className="flex items-center justify-between">
             <div>
                 <p className="text-sm text-yellow-400/60">{title}</p>
@@ -165,9 +166,12 @@ const YourInteractions = () => {
         avgSentiment: 0,
         completionRate: 0
     });
+    const [suggestions, setSuggestions] = useState(null);
+    const [suggestionsLoading, setSuggestionsLoading] = useState(true);
 
     useEffect(() => {
         fetchUserRecords();
+        fetchSuggestions();
     }, []);
 
     const fetchUserRecords = async () => {
@@ -176,7 +180,7 @@ const YourInteractions = () => {
             const response = await fetch('http://127.0.0.1:5002/get-user-records');
             const responseData = await response.json();
             console.log('API Response:', responseData); // Debug log
-
+            localStorage.setItem('user_id', JSON.stringify(responseData.data.user_id));
             if (responseData.status === 'success') {
                 // Ensure we're using the data array from the response
                 const records = responseData.data || [];
@@ -192,6 +196,20 @@ const YourInteractions = () => {
             setError('Failed to fetch user records');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchSuggestions = async () => {
+        try {
+            setSuggestionsLoading(true);
+            const response = await fetch('http://127.0.0.1:5010/api/user-suggestions/U024');
+            const data = await response.json();
+            console.log(data);
+            setSuggestions(data);
+        } catch (err) {
+            console.error('Error fetching suggestions:', err);
+        } finally {
+            setSuggestionsLoading(false);
         }
     };
 
@@ -254,8 +272,27 @@ const YourInteractions = () => {
     const chartData = prepareChartData(records);
 
     return (
-        <div className="min-h-screen p-8 bg-gradient-to-b from-gray-900 to-black">
+        <div className="min-h-screen p-8">
             <h1 className="text-4xl font-bold text-yellow-400 mb-8">Interaction Analytics</h1>
+
+            {/* Suggestions Panel with loading state */}
+            {suggestionsLoading ? (
+                <div className="rounded-xl p-6 border border-yellow-400/20 mb-8">
+                    <div className="flex items-center space-x-4">
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-6 h-6 border-2 border-yellow-400 border-t-transparent rounded-full"
+                        />
+                        <span className="text-yellow-400">Loading suggestions...</span>
+                    </div>
+                </div>
+            ) : suggestions && (
+                <SuggestionsPanel
+                    suggestions={suggestions.suggestions}
+                    patterns={suggestions.user_patterns}
+                />
+            )}
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -288,7 +325,7 @@ const YourInteractions = () => {
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 {/* Timeline Chart */}
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-yellow-400/20">
+                <div className="rounded-xl p-6 border border-yellow-400/20">
                     <h2 className="text-xl font-bold text-yellow-400 mb-4">Response Time Trend</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={chartData.timeline}>
@@ -307,7 +344,7 @@ const YourInteractions = () => {
                 </div>
 
                 {/* Task Distribution */}
-                <div className="bg-gray-800/50 rounded-xl p-6 border border-yellow-400/20">
+                <div className="rounded-xl p-6 border border-yellow-400/20">
                     <h2 className="text-xl font-bold text-yellow-400 mb-4">Task Distribution</h2>
                     <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
@@ -332,7 +369,7 @@ const YourInteractions = () => {
             </div>
 
             {/* Detailed Records Table */}
-            <div className="bg-gray-800/50 rounded-xl p-6 border border-yellow-400/20">
+            <div className="rounded-xl p-6 border border-yellow-400/20">
                 <h2 className="text-xl font-bold text-yellow-400 mb-4">Detailed Records</h2>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left text-yellow-200">

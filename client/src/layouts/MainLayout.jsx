@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
-import { 
-  FaUsers, 
-  FaChartBar, 
-  FaMagic, 
-  FaBars, 
+import {
+  FaUsers,
+  FaChartBar,
+  FaMagic,
+  FaBars,
   FaTimes,
 } from 'react-icons/fa';
 import { MessageSquare } from 'lucide-react';
@@ -14,9 +14,9 @@ const MainLayout = () => {
   const location = useLocation();
 
   const navItems = [
-    { 
-      path: '/dashboard', 
-      icon: FaChartBar, 
+    {
+      path: '/dashboard',
+      icon: FaChartBar,
       label: 'Dashboard',
       emoji: '📊',
       description: 'Overview and analytics'
@@ -40,7 +40,14 @@ const MainLayout = () => {
       icon: FaMagic,
       label: 'Notion AI',
       emoji: '📖',
-      description: 'Seamless Notion Integration' ,
+      description: 'Seamless Notion Integration',
+    },
+    {
+      path: '/interactions',
+      icon: FaMagic,
+      label: 'Your Interactions',
+      emoji: '🛠️',
+      description: 'Interactions with our apps'
     },
     {
       path: '/meet',
@@ -49,15 +56,13 @@ const MainLayout = () => {
       emoji: '🎤',
       description: 'Get the analysis of your meetings',
     }
-
   ];
 
   return (
     <div className="flex h-screen bg-zinc-900">
       {/* Reduced height by adding pb-14 to account for footer and adjusted spacing */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-br from-zinc-800 via-zinc-900 to-black shadow-xl transform transition-all duration-300 ease-in-out overflow-hidden flex flex-col ${
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-br from-zinc-800 via-zinc-900 to-black shadow-xl transform transition-all duration-300 ease-in-out overflow-hidden flex flex-col ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
         <div className="flex items-center justify-between h-14 px-4 border-b border-zinc-700/50 backdrop-blur-md bg-zinc-800/30">
           <h1 className="text-xl font-bold text-transparent bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text">
             Prachaar
@@ -77,19 +82,17 @@ const MainLayout = () => {
               <Link
                 key={path}
                 to={path}
-                className={`group flex flex-col px-3 py-1.5 rounded-lg transition-all duration-200 ${
-                  location.pathname === path
-                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-zinc-900 shadow-lg shadow-yellow-500/20 scale-[1.02]'
-                    : 'text-zinc-400 hover:bg-zinc-800/50 hover:shadow-md hover:scale-[1.02]'
-                }`}
+                className={`group flex flex-col px-3 py-1.5 rounded-lg transition-all duration-200 ${location.pathname === path
+                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-zinc-900 shadow-lg shadow-yellow-500/20 scale-[1.02]'
+                  : 'text-zinc-400 hover:bg-zinc-800/50 hover:shadow-md hover:scale-[1.02]'
+                  }`}
               >
                 <div className="flex items-center">
                   <span className="text-xl mr-2">{emoji}</span>
                   <span className="font-medium text-sm">{label}</span>
                 </div>
-                <span className={`text-[11px] mt-0.5 ml-8 ${
-                  location.pathname === path ? 'text-blue-100' : 'text-gray-500'
-                }`}>
+                <span className={`text-[11px] mt-0.5 ml-8 ${location.pathname === path ? 'text-blue-100' : 'text-gray-500'
+                  }`}>
                   {description}
                 </span>
               </Link>

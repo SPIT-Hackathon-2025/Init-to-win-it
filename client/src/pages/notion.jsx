@@ -50,10 +50,10 @@ const NotionAIApp = () => {
   const handleDownloadPDF = () => {
     // Create a temporary div to combine analytics and insights
     const tempDiv = document.createElement('div');
-    
+
     // Clone the analytics report
     const analyticsReport = document.getElementById('analysis-report').cloneNode(true);
-    
+
     // Create insights section
     const insightsDiv = document.createElement('div');
     insightsDiv.className = 'mt-8 p-4';
@@ -63,11 +63,11 @@ const NotionAIApp = () => {
         ${analysisData.ai_insights}
       </div>
     `;
-    
+
     // Combine both elements
     tempDiv.appendChild(analyticsReport);
     tempDiv.appendChild(insightsDiv);
-    
+
     const opt = {
       margin: 1,
       filename: 'task-analysis-report.pdf',
@@ -75,7 +75,7 @@ const NotionAIApp = () => {
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
-    
+
     html2pdf().set(opt).from(tempDiv).save();
   };
 
@@ -98,7 +98,7 @@ const NotionAIApp = () => {
 
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/tasks`, {
         method: 'POST',
@@ -183,7 +183,7 @@ const NotionAIApp = () => {
             />
             <div className="flex justify-end gap-4">
               <motion.button
-                whileHover={{ scale: 1.02 }}cat
+                whileHover={{ scale: 1.02 }} cat
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSubmit}
                 disabled={loading}
