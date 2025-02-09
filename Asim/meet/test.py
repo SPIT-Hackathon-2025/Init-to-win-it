@@ -297,15 +297,14 @@ def meeting_followup():
     try:
         print("hi")
         data = request.json
-        if not data or 'user_response' not in data or 'previous_input' not in data or 'previous_output' not in data:
+        if not data or 'prompt' not in data:
             return jsonify({
                 "status": "error",
                 "message": "Missing required fields in request body"
             }), 400
         
-        user_response = data['user_response']
-        previous_input = data['previous_input']
-        previous_output = data['previous_output']
+        prompt = data['prompt']
+        
         host_email = "asim.shah22@spit.ac.in"  # Default host
 
         # Get current time context
@@ -319,10 +318,7 @@ def meeting_followup():
 {time_context}
 
 Context:
-- Previous Request: {previous_input}
-- Assistant's Last Response: {previous_output}
-- User's Latest Response: {user_response}
-
+- Prompt : {prompt}
 You are a meeting scheduler that MUST create a meeting. Extract or determine these details:
 1. Date and time (if not specified, pick any suitable time during work hours)
 2. Duration (default to 1 hour if not specified)
@@ -352,7 +348,7 @@ DETAILS: [Include:
         details = details_match.group(1).strip()
 
         # Extract participants and create meeting
-        participant_emails = scheduler.extract_emails(previous_input)
+        participant_emails = scheduler.extract_emails(prompt)
         if host_email not in participant_emails:
             participant_emails.append(host_email)
             
