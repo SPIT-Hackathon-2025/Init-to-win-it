@@ -7,6 +7,7 @@ const Details = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const AUTH_BACKEND_URL = import.meta.env.VITE_GOOGLE_AUTH_SERVER;
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
 
@@ -43,6 +44,10 @@ const Details = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleGoToDashboard = () => {
+        navigate('/dashboard');
     };
 
     return (
@@ -134,6 +139,18 @@ const Details = () => {
                             </a>
                         </p>
                     </motion.form>
+
+                    <motion.button
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                        onClick={handleGoToDashboard}
+                        className="w-full mt-4 bg-yellow-400/10 text-yellow-400 p-3 rounded-lg 
+                            hover:bg-yellow-400/20 transition-colors font-medium text-lg border 
+                            border-yellow-400/20 hover:border-yellow-400/40"
+                    >
+                        Go to Dashboard
+                    </motion.button>
                 </div>
             </div>
         </div>
