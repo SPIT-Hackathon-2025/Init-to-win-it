@@ -252,6 +252,10 @@ def generate_ai_insights(df):
 
 def generate_enhanced_graphs(df):
     """Generate comprehensive interactive graphs with detailed metrics"""
+    if df.empty:
+        logger.warning("DataFrame is empty. No graphs to generate.")
+        return {}
+
     graphs = {}
     
     # Add calculated metrics
