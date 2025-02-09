@@ -30,7 +30,7 @@ const Login = () => {
                         animate={{ y: 0, opacity: 1 }}
                         className="text-4xl font-bold text-yellow-400 mb-4"
                     >
-                        Prachaar
+                        Automate.ai
                     </motion.h2>
                     <motion.p 
                         initial={{ y: 20, opacity: 0 }}

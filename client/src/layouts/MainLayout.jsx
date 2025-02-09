@@ -65,7 +65,7 @@ const MainLayout = () => {
         }`}>
         <div className="flex items-center justify-between h-14 px-4 border-b border-zinc-700/50 backdrop-blur-md bg-zinc-800/30">
           <h1 className="text-xl font-bold text-transparent bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text">
-            Prachaar
+          Automate.ai
           </h1>
           <button
             onClick={() => setSidebarOpen(false)}
