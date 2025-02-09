@@ -13,7 +13,7 @@ from pymongo import MongoClient
 load_dotenv()
 
 app = Flask(__name__)
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+os.environ["OPENAI_API_KEY"] = "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"
 
 # MongoDB connection setup
 client = MongoClient(os.getenv("MONGODB_URI"))
@@ -280,6 +280,101 @@ DETAILS: [relevant details like time, participants, etc.]
                 "status": "error",
                 "message": f"Unknown action: {action}"
             }), 400
+            
+    except Exception as e:
+        print(f"Error in /followup endpoint: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": f"Server error: {str(e)}"
+        }), 500
+    
+
+@app.route('/execute', methods=['POST'])
+def meeting_followup():
+    try:
+        print("hi")
+        data = request.json
+        if not data or 'user_response' not in data or 'previous_input' not in data or 'previous_output' not in data:
+            return jsonify({
+                "status": "error",
+                "message": "Missing required fields in request body"
+            }), 400
+        
+        user_response = data['user_response']
+        previous_input = data['previous_input']
+        previous_output = data['previous_output']
+        host_email = "asim.shah22@spit.ac.in"  # Default host
+
+        # Get current time context
+        time_context = scheduler.get_current_time_context()
+        
+        # Ensure tools and agent_executor are initialized
+        scheduler.ensure_initialized(scheduler.get_user_api_key(host_email))
+        
+        # Simplified decision prompt focusing only on meeting creation
+        decision_prompt = f"""
+{time_context}
+
+Context:
+- Previous Request: {previous_input}
+- Assistant's Last Response: {previous_output}
+- User's Latest Response: {user_response}
+
+You are a meeting scheduler that MUST create a meeting. Extract or determine these details:
+1. Date and time (if not specified, pick any suitable time during work hours)
+2. Duration (default to 1 hour if not specified)
+3. Meeting purpose/title
+4. Any special requirements
+
+Output format (use exactly this format):
+DETAILS: [Include:
+- Date and time (or specify "any available time during work hours")
+- Duration
+- Purpose/title
+- Any special requirements]
+"""
+        
+        # Get the decision from OpenAI
+        decision_result = scheduler.agent_executor.invoke({"input": decision_prompt})
+        action_output = decision_result['output']
+        # Parse the details
+        details_match = re.search(r'DETAILS:\s*(.*)', action_output, re.DOTALL)
+        
+        if not details_match:
+            return jsonify({
+                "status": "error",
+                "message": "Could not extract meeting details from AI response"
+            }), 400
+            
+        details = details_match.group(1).strip()
+
+        # Extract participants and create meeting
+        participant_emails = scheduler.extract_emails(previous_input)
+        if host_email not in participant_emails:
+            participant_emails.append(host_email)
+            
+        creation_prompt = f"""
+        EXECUTE: Create a Google Meet with these exact specifications:
+        Host: {host_email}
+        Participants: {', '.join(participant_emails)}
+        Details: {details}
+        
+        If no specific time is mentioned, schedule for the next available time slot during work hours (9 AM - 5 PM).
+        
+        Required actions:
+        1. Create the Google Meet event
+        2. Send calendar invites to all participants
+        3. Return the meeting link and confirmation
+        """
+        
+        result = scheduler.agent_executor.invoke({"input": creation_prompt})
+        
+        return jsonify({
+            "status": "success",
+            "result": result,
+            "action_taken": "CREATE_MEETING",
+            "participants": participant_emails
+        })
             
     except Exception as e:
         print(f"Error in /followup endpoint: {str(e)}")
