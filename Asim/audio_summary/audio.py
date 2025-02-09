@@ -26,6 +26,13 @@ import contextlib
 import wave
 from flask.json.provider import DefaultJSONProvider
 
+from langchain.agents import create_openai_functions_agent, AgentExecutor
+from langchain import hub
+from langchain_openai import ChatOpenAI
+from composio_langchain import ComposioToolSet
+import os
+from datetime import datetime
+
 # Load environment variables
 load_dotenv()
 
@@ -412,6 +419,152 @@ def get_analysis(meet_id):
         
     except Exception as e:
         logger.error(f"Error fetching analysis for meet_id {meet_id}: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+def initialize_composio_agent():
+    """Initialize the Composio agent with necessary tools"""
+    # Get OpenAI API key from environment
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    if not openai_api_key:
+        logger.error("OPENAI_API_KEY not found in environment variables")
+        raise ValueError("OPENAI_API_KEY is required. Please set it in your .env file")
+
+    llm = ChatOpenAI(api_key=openai_api_key)
+    prompt = hub.pull("hwchase17/openai-functions-agent")
+    
+    toolset = ComposioToolSet(api_key=os.getenv('COMPOSIO_API_KEY'))
+    
+    # Define required tools
+    doc_tools = [
+        'GOOGLEDOCS_CREATE_DOCUMENT',
+        'GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN',
+        'GOOGLEDOCS_GET_DOCUMENT_BY_ID'
+    ]
+    gmail_tools = ['GMAIL_SEND_EMAIL']
+    
+    tools = toolset.get_tools(actions=[*doc_tools, *gmail_tools])
+    agent = create_openai_functions_agent(llm, tools, prompt)
+    return AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+def format_analysis_for_doc(analysis):
+    """Format meeting analysis into a structured document"""
+    meeting_date = datetime.strptime(analysis['meeting_details']['start_time'], 
+                                   "%Y-%m-%dT%H:%M:%SZ").strftime("%B %d, %Y")
+    
+    doc_content = f"""# Meeting Analysis Report
+Date: {meeting_date}
+Title: {analysis['meeting_details']['title']}
+
+## Meeting Details
+- Duration: {analysis['meeting_details']['duration_minutes']} minutes
+- Host: {analysis['meeting_details']['host']}
+- Participants: {analysis['meeting_details']['participant_count']}
+
+## Executive Summary
+{analysis['summary']}
+
+## Meeting Minutes
+{analysis['minutes']['formatted_minutes']}
+
+## Sentiment Analysis
+Overall Sentiment: {analysis['sentiment_analysis']['overall_sentiment']}
+
+### Sentiment Summary
+- Positive Segments: {analysis['sentiment_analysis']['summary']['positive_segments']}
+- Negative Segments: {analysis['sentiment_analysis']['summary']['negative_segments']}
+- Neutral Segments: {analysis['sentiment_analysis']['summary']['neutral_segments']}
+
+send the document link to participants as well
+
+"""
+    return doc_content
+
+@app.route('/share/<meet_id>', methods=['POST'])
+def share_analysis(meet_id):
+    try:
+        logger.info(f"Starting share process for meet_id: {meet_id}")
+        
+        # Check if analysis exists
+        analysis = analysis_collection.find_one({'meet_id': meet_id})
+        if not analysis:
+            return jsonify({'error': 'Analysis not found for this meeting'}), 404
+            
+        # Get participant emails from meeting details
+        participants = analysis['participants']['participants']
+        participant_emails = [p['email'] for p in participants if 'email' in p]
+        
+        if not participant_emails:
+            return jsonify({'error': 'No participant emails found'}), 400
+            
+        # Initialize Composio agent
+        executor = initialize_composio_agent()
+        
+        # Format document content
+        doc_content = format_analysis_for_doc(analysis)
+        
+        # Create Google Doc
+        create_doc_prompt = f"""
+        Create a Google Doc with the following content:
+        {doc_content}
+        
+        Title the document: "Meeting Analysis - {analysis['meeting_details']['title']} - {meet_id}"
+        """
+        
+        doc_result = executor.invoke({"input": create_doc_prompt})
+        
+        # Extract document ID and URL from result
+        doc_id = doc_result['output']  # Adjust based on actual response structure
+        doc_url = f"https://docs.google.com/document/d/{doc_id}"  # Construct document URL
+        
+        # Share document with participants
+        for email in participant_emails:
+            email_prompt = f"""
+            Send an email to {email} with:
+            Subject: Meeting Analysis - {analysis['meeting_details']['title']}
+            Body: 
+            Hello,
+            
+            The analysis for your recent meeting "{analysis['meeting_details']['title']}" 
+            is now available. You can access it through this link:
+            
+            {doc_url}
+            
+            Meeting Date: {datetime.strptime(analysis['meeting_details']['start_time'], "%Y-%m-%dT%H:%M:%SZ").strftime("%B %d, %Y")}
+            Duration: {analysis['meeting_details']['duration_minutes']} minutes
+            
+            Please let us know if you have any questions or if you have trouble accessing the document.
+            
+            Best regards,
+            Meeting Analysis Team
+            """
+            
+            executor.invoke({"input": email_prompt})
+        
+        # Update meeting document with sharing status
+        analysis_collection.update_one(
+            {'meet_id': meet_id},
+            {
+                '$set': {
+                    'shared_status': {
+                        'shared_at': datetime.utcnow(),
+                        'shared_with': participant_emails,
+                        'doc_id': doc_id,
+                        'doc_url': doc_url
+                    }
+                }
+            }
+        )
+        
+        return jsonify({
+            'message': 'Analysis shared successfully',
+            'shared_with': participant_emails,
+            'doc_id': doc_id,
+            'doc_url': doc_url,
+            'meet_id': meet_id
+        })
+        
+    except Exception as e:
+        logger.error(f"Error sharing analysis for meet_id {meet_id}: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

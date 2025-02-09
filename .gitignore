@@ -21,3 +21,4 @@ audio/
 Asim/audio_summary/audio_server.log
 Asim/audio_summary/.env
 Asim/audio_summary/meeting_service.log
+Asim/audio_summary/.composio.lock
