@@ -101,7 +101,8 @@ const LiveTracker = () => {
           label: 'Notion Task',
           color: 'text-purple-400',
           bgColor: 'bg-purple-400/10',
-          borderColor: 'border-purple-400/30'
+          borderColor: 'border-purple-400/30',
+          zIndex: 1
         };
       case 'calendar':
         return {
@@ -316,7 +317,7 @@ const LiveTracker = () => {
             {(type === 'notion_task' || type === 'calendar') && (
               <div className="absolute bottom-4 right-4 flex items-center gap-2">
                 <div className={`text-sm ${emailType.color} mr-2 bg-black/40 
-                  px-2 py-1 rounded-lg backdrop-blur-sm`}>
+                  px-2 py-1 rounded-lg`}>
                   {type === 'notion_task' ? 'Create Notion Task:' : 'Add to Calendar:'}
                 </div>
                 <motion.button

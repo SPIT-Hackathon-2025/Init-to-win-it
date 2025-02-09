@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Terminal, Brain, AlertCircle, Download } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Terminal, Download, Loader } from 'lucide-react';
 import AdvancedAnalytics from '@/components/analytics';
 import html2pdf from 'html2pdf.js';
 
@@ -58,7 +59,7 @@ const NotionAIApp = () => {
     insightsDiv.className = 'mt-8 p-4';
     insightsDiv.innerHTML = `
       <h2 class="text-2xl font-bold mb-4">AI Insights</h2>
-      <div class="prose prose-invert prose-yellow">
+      <div class="text-black prose prose-invert prose-yellow">
         ${analysisData.ai_insights}
       </div>
     `;
@@ -131,113 +132,169 @@ const NotionAIApp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="bg-black rounded-lg p-6 shadow-lg border-2 border-yellow-400">
-          <h1 className="text-3xl font-bold flex items-center gap-2 text-yellow-400">
-            <Terminal className="text-yellow-400" />
-            Schedule Task
+    <div className="min-h-screen p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-black/40 backdrop-blur-xl rounded-2xl p-8 border border-yellow-400/20
+            shadow-lg"
+        >
+          <h1 className="text-5xl font-bold text-yellow-400 mb-4">
+            Notion Integration
           </h1>
-        </div>
+          <p className="text-yellow-400/60 text-xl">
+            Seamlessly manage and analyze your tasks with AI-powered insights
+          </p>
+        </motion.div>
 
         {/* Error Display */}
-        {error && (
-          <div className="bg-black rounded-lg p-4 border-2 border-yellow-400 flex items-center gap-2 text-yellow-400">
-            <AlertCircle size={20} />
-            <p>{error}</p>
-          </div>
-        )}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="bg-red-500/10 backdrop-blur-xl rounded-xl p-4 border border-red-500/20
+                flex items-center gap-3 text-red-400"
+            >
+              <Terminal size={20} />
+              <p>{error}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Chat Input */}
-        <div className="bg-black rounded-lg p-6 shadow-lg border-2 border-yellow-400">
-          <div className="flex gap-4">
+        {/* Task Input Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-black/40 backdrop-blur-xl rounded-2xl p-8 border border-yellow-400/20
+            shadow-lg hover:border-yellow-400/40 transition-colors group"
+        >
+          <div className="space-y-6">
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              className="flex-1 p-4 rounded-lg min-h-[100px] bg-black text-yellow-400 border-2 border-yellow-400 placeholder-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full min-h-[120px] bg-black/60 rounded-xl p-6 text-yellow-400
+                placeholder-yellow-400/30 border-2 border-yellow-400/20 focus:border-yellow-400/40
+                focus:outline-none transition-colors resize-none"
               placeholder="Describe your task here..."
             />
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="bg-yellow-400 text-black px-6 py-2 rounded-lg hover:bg-yellow-300 transition-colors font-bold disabled:opacity-50 disabled:hover:bg-yellow-400"
-            >
-              Schedule Task
-            </button>
-          </div>
-        </div>
-
-        {/* Loading Screen */}
-        {(loading || analysisLoading) && (
-          <div className="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center">
-            <div className="text-center space-y-8">
-              <div className="text-6xl animate-bounce mb-8">
-                {loading ? "📋" : "📊"}
-              </div>
-              <p className="text-yellow-400 text-2xl font-bold animate-pulse">
-                {currentPhrase}
-              </p>
+            <div className="flex justify-end gap-4">
+              <motion.button
+                whileHover={{ scale: 1.02 }}cat
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSubmit}
+                disabled={loading}
+                className="px-8 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500
+                  text-black font-bold rounded-xl shadow-lg hover:shadow-yellow-400/20
+                  disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {loading ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-6 h-6 border-2 border-black border-t-transparent rounded-full"
+                  />
+                ) : (
+                  'Schedule Task'
+                )}
+              </motion.button>
             </div>
           </div>
-        )}
+        </motion.div>
 
         {/* Analysis Section */}
         <div className="space-y-6">
           {!showAnalysis ? (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleGenerateReport}
               disabled={analysisLoading}
-              className="w-full bg-black rounded-lg p-6 border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-colors disabled:opacity-50 disabled:hover:bg-black disabled:hover:text-yellow-400"
+              className="w-full bg-black/40 backdrop-blur-xl rounded-2xl p-8 border
+                border-yellow-400/20 text-yellow-400 hover:border-yellow-400/40
+                transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                shadow-lg hover:shadow-yellow-400/20"
             >
-              Generate Analysis Report
-            </button>
+              <div className="flex items-center justify-center gap-3">
+                <Loader className={`w-5 h-5 ${analysisLoading ? 'animate-spin' : ''}`} />
+                Generate Analysis Report
+              </div>
+            </motion.button>
           ) : (
-            <div className="bg-black rounded-lg p-6 border-2 border-yellow-400">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-yellow-400">Analysis Report</h2>
-                <button
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-black/40 backdrop-blur-xl rounded-2xl p-8 border
+                border-yellow-400/20 shadow-lg"
+            >
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-3xl font-bold text-yellow-400">Analysis Report</h2>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleDownloadPDF}
-                  className="flex items-center gap-2 bg-yellow-400 text-black px-4 py-2 rounded-lg hover:bg-yellow-300 transition-colors"
+                  className="flex items-center gap-2 px-6 py-3 bg-yellow-400/10
+                    hover:bg-yellow-400/20 text-yellow-400 rounded-xl border
+                    border-yellow-400/20 hover:border-yellow-400/40 transition-all"
                 >
                   <Download size={20} />
                   Download Report
-                </button>
+                </motion.button>
               </div>
-              <div id="analysis-report" className="bg-black text-yellow-400">
+              <div id="analysis-report" className="bg-black/60 rounded-xl p-6 border
+                border-yellow-400/20">
                 <AdvancedAnalytics data={analysisData} />
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
 
-      {/* Styles */}
-      <style jsx global>{`
-        @keyframes pulse {
-          0% { opacity: 0.4; }
-          50% { opacity: 1; }
-          100% { opacity: 0.4; }
-        }
-        
-        * {
-          scrollbar-color: #FCD34D #000000;
-        }
-
-        ::-webkit-scrollbar {
-          width: 12px;
-        }
-
-        ::-webkit-scrollbar-track {
-          background: #000000;
-        }
-
-        ::-webkit-scrollbar-thumb {
-          background-color: #FCD34D;
-          border: 3px solid #000000;
-          border-radius: 6px;
-        }
-      `}</style>
+      {/* Loading Overlay */}
+      <AnimatePresence>
+        {(loading || analysisLoading) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center
+              justify-center"
+          >
+            <div className="text-center space-y-6">
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 360],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="text-6xl"
+              >
+                ✨
+              </motion.div>
+              <motion.p
+                animate={{
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="text-yellow-400 text-2xl font-bold"
+              >
+                {currentPhrase}
+              </motion.p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

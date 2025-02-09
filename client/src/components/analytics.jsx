@@ -80,10 +80,10 @@ const EnhancedAnalytics = ({ data }) => {
   }));
 
   return (
-    <div className="space-y-8 bg-black text-yellow-400 p-6">
+    <div className="space-y-8 text-yellow-400 p-6">
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-black border-2 border-yellow-400">
+        <Card className="bg-black/40 border-2 border-yellow-400">
           <CardHeader className="p-4">
             <CardTitle className="text-sm font-medium text-yellow-400">Total Tasks</CardTitle>
           </CardHeader>
@@ -91,7 +91,7 @@ const EnhancedAnalytics = ({ data }) => {
             <div className="text-2xl font-bold text-yellow-400">{data.total_tasks}</div>
           </CardContent>
         </Card>
-        <Card className="bg-black border-2 border-yellow-400">
+        <Card className="bg-black/40 border-2 border-yellow-400">
           <CardHeader className="p-4">
             <CardTitle className="text-sm font-medium text-yellow-400">Completion Rate</CardTitle>
           </CardHeader>
@@ -101,7 +101,7 @@ const EnhancedAnalytics = ({ data }) => {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-black border-2 border-yellow-400">
+        <Card className="bg-black/40 border-2 border-yellow-400">
           <CardHeader className="p-4">
             <CardTitle className="text-sm font-medium text-yellow-400">High Priority Tasks</CardTitle>
           </CardHeader>
@@ -109,7 +109,7 @@ const EnhancedAnalytics = ({ data }) => {
             <div className="text-2xl font-bold text-yellow-400">{data.tasks_by_priority.High}</div>
           </CardContent>
         </Card>
-        <Card className="bg-black border-2 border-yellow-400">
+        <Card className="bg-black/40 border-2 border-yellow-400">
           <CardHeader className="p-4">
             <CardTitle className="text-sm font-medium text-yellow-400">Urgent Tasks</CardTitle>
           </CardHeader>

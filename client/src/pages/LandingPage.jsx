@@ -1,31 +1,33 @@
 import { motion, useScroll, useSpring } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
-  FiTrendingUp,
-  FiMessageCircle,
-  FiCheckSquare,
+  FiMail,
   FiCalendar,
-  FiGitMerge,
-  FiTwitter,
-  FiBarChart2
+  FiFileText,
+  FiDatabase,
+  FiClock,
+  FiLink,
+  FiGrid,
+  FiLayers
 } from 'react-icons/fi'
 import { RiRobot2Line } from 'react-icons/ri'
 
 const DiagonalSection = ({ children, reverse }) => (
-  <div className={`relative py-20 ${reverse ? 'bg-[#111]' : 'bg-yellow-400'}`}>
-    <div className="absolute inset-0 overflow-hidden">
+  <div className={`relative py-20 ${reverse ? 'bg-[#111]' : 'bg-gradient-to-br from-yellow-400 to-yellow-500'}`}>
+    <div className="absolute inset-0 overflow-hidden backdrop-blur-3xl">
       {[...Array(20)].map((_, i) => (
         <motion.div
           key={i}
-          className={`absolute h-[2px] ${reverse ? 'bg-yellow-400/20' : 'bg-black/10'}`}
+          className={`absolute h-[2px] ${reverse ? 'bg-yellow-400/20' : 'bg-black/5'}`}
           style={{
             width: Math.random() * 300 + 100,
             top: `${(i * 5) + Math.random() * 5}%`,
             left: `${Math.random() * 100}%`,
+            filter: 'blur(1px)',
           }}
           animate={{
             x: [0, 100, 0],
-            opacity: [0.5, 1, 0.5],
+            opacity: [0.3, 0.8, 0.3],
           }}
           transition={{
             duration: Math.random() * 5 + 5,
@@ -64,12 +66,17 @@ const StaggeredGrid = ({ items }) => (
         key={i}
         initial={{ y: 50, opacity: 0 }}
         whileInView={{ y: 0, opacity: 1 }}
+        whileHover={{ y: -5, scale: 1.02 }}
         transition={{ delay: i * 0.1 }}
-        className="bg-black/50 backdrop-blur-lg rounded-lg p-8 border border-yellow-400/20
-          hover:border-yellow-400 transition-colors"
+        className="bg-black/90 backdrop-blur-xl rounded-2xl p-8 border border-yellow-400/20
+          hover:border-yellow-400 transition-all shadow-lg hover:shadow-yellow-400/20"
       >
-        <item.icon className="w-12 h-12 text-yellow-400 mb-4" />
-        <h3 className="text-xl font-bold mb-3 text-white">{item.title}</h3>
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 bg-yellow-400/10 rounded-xl">
+            <item.icon className="w-8 h-8 text-yellow-400" />
+          </div>
+          <h3 className="text-xl font-bold text-white">{item.title}</h3>
+        </div>
         <p className="text-gray-300">{item.description}</p>
       </motion.div>
     ))}
@@ -91,54 +98,54 @@ export default function LandingPage() {
 
   const mainFeatures = [
     {
-      icon: FiTrendingUp,
-      title: "Smart Content Creation",
-      description: "AI-powered content generation tailored to your brand voice and audience.",
+      icon: FiMail,
+      title: "Smart Email Management",
+      description: "Automatically fetch, categorize, and prioritize emails across all your accounts.",
       color: "border-purple-100"
     },
     {
-      icon: RiRobot2Line,
-      title: "AI Support Assistant",
-      description: "Intelligent bot that learns from your business context to assist customers.",
+      icon: FiCalendar,
+      title: "Intelligent Meeting Scheduler",
+      description: "AI-powered meeting scheduling that syncs with your calendar and adapts to your preferences.",
       color: "border-blue-100"
     },
     {
-      icon: FiCheckSquare,
-      title: "Smart Ticketing",
-      description: "Automated ticket management with smart prioritization.",
+      icon: FiFileText,
+      title: "Document Automation",
+      description: "Automatically create and organize Google Docs and Sheets based on your templates.",
       color: "border-pink-100"
     },
     {
-      icon: FiTwitter,
-      title: "Social Automation",
-      description: "Schedule and manage social media posts with ease.",
+      icon: FiDatabase,
+      title: "Notion Integration",
+      description: "Seamless synchronization with Notion databases, pages, and workflows.",
       color: "border-indigo-100"
     }
   ]
 
   const workflowFeatures = [
     {
-      icon: FiGitMerge,
-      title: "Campaign Dashboard",
-      description: "Centralized dashboard to manage all Marketing campaigns, toggle campaign status, and monitor performance metrics.",
+      icon: FiClock,
+      title: "Time Management",
+      description: "Smart scheduling system that optimizes your daily workflow and meeting times.",
       color: "border-green-100"
     },
     {
-      icon: FiBarChart2,
-      title: "Performance Analytics",
-      description: "Comprehensive analytics showing bot performance, customer sentiment, and campaign effectiveness.",
+      icon: FiLink,
+      title: "Cross-Platform Sync",
+      description: "Unified integration between Gmail, Google Calendar, Docs, Sheets, and Notion.",
       color: "border-orange-100"
     },
     {
-      icon: FiCalendar,
-      title: "Content Calendar",
-      description: "Visual calendar interface for scheduling posts, managing content pipeline, and coordinating campaigns.",
+      icon: FiGrid,
+      title: "Smart Templates",
+      description: "Customizable templates for documents, spreadsheets, and Notion pages.",
       color: "border-teal-100"
     },
     {
-      icon: FiMessageCircle,
-      title: "Interaction Monitor",
-      description: "Track and analyze all customer interactions with sentiment analysis and automated response suggestions.",
+      icon: FiLayers,
+      title: "Workflow Automation",
+      description: "Create automated workflows between email, calendar, documents, and Notion.",
       color: "border-cyan-100"
     }
   ]
@@ -151,28 +158,56 @@ export default function LandingPage() {
       />
 
       <section className="min-h-screen relative flex items-center overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] 
-          from-yellow-400/20 via-transparent to-transparent" />
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/10 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10" />
+        </div>
         <div className="container mx-auto px-6 relative">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             className="max-w-4xl mx-auto text-center"
           >
-            <motion.span
-              className="inline-block px-6 py-2 bg-yellow-400 rounded-full text-black text-sm 
-                font-medium mb-6"
-              whileHover={{ scale: 1.05 }}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="mb-12"
             >
-              The Future of Marketing is Here
-            </motion.span>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white">
-              Upgrade Your Marketing Agency with{' '}
-              <span className="text-yellow-400">AI</span>
+              <span className="inline-block px-6 py-2 bg-yellow-400/10 border border-yellow-400/20 
+                rounded-full text-yellow-400 text-sm font-medium backdrop-blur-xl">
+                Revolutionizing Workflow Automation
+              </span>
+            </motion.div>
+            <h1 className="text-6xl md:text-8xl font-bold mb-8 text-white leading-tight">
+              Work Smarter with{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-500">
+                AI Integration
+              </span>
             </h1>
-            <p className="text-xl text-gray-300 mb-8">
-              Enhance your entire Marketing workflow with AI-powered solutions
+            <p className="text-xl text-gray-300 mb-12">
+              Seamlessly connect your emails, meetings, documents, and Notion workspace
             </p>
+            <div className="flex items-center justify-center gap-6">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black 
+                  font-bold rounded-xl shadow-lg shadow-yellow-400/20 hover:shadow-yellow-400/40 
+                  transition-all"
+                onClick={handleStartTrial}
+              >
+                Get Started Now
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 bg-black/30 backdrop-blur-xl text-white font-bold rounded-xl 
+                  border border-yellow-400/20 hover:border-yellow-400 transition-all"
+              >
+                Watch Demo
+              </motion.button>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -196,29 +231,6 @@ export default function LandingPage() {
         </motion.div>
         <StaggeredGrid items={workflowFeatures} />
       </DiagonalSection>
-
-      <section className="py-20 relative overflow-hidden">
-        <div className="container mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <h2 className="text-4xl font-bold mb-6 text-white">
-              Ready to Transform Your Marketing?
-            </h2>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-yellow-400 text-black font-bold rounded-lg 
-                hover:bg-yellow-300 transition-colors"
-              onClick={handleStartTrial}
-            >
-              Get Started Now
-            </motion.button>
-          </motion.div>
-        </div>
-      </section>
     </div>
   )
 }

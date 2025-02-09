@@ -389,7 +389,7 @@ const Dashboard = () => {
               duration: 3,
               ease: 'linear'
             }}
-            className="relative overflow-hidden bg-[#131313]/80 rounded-lg border border-yellow-400/30 p-4 backdrop-blur-md shadow-lg"
+            className="relative overflow-hidden  rounded-lg border border-yellow-400/30 p-4 backdrop-blur-md shadow-lg"
           >
             <div className="flex items-center justify-center space-x-3">
               <motion.span

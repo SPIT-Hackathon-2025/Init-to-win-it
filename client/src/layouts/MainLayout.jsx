@@ -34,7 +34,15 @@ const MainLayout = () => {
       label: 'Calender Agent',
       emoji: '📅',
       description: 'Schedule and manage meetings',
+    },
+    {
+      path: '/notion',
+      icon: FaMagic,
+      label: 'Notion AI',
+      emoji: '📖',
+      description: 'Seamless Notion Integration' ,
     }
+
   ];
 
   return (
@@ -69,7 +77,7 @@ const MainLayout = () => {
                 }`}
               >
                 <div className="flex items-center">
-                  <span className="text-lg mr-2">{emoji}</span>
+                  <span className="text-xl mr-2">{emoji}</span>
                   <span className="font-medium text-sm">{label}</span>
                 </div>
                 <span className={`text-[11px] mt-0.5 ml-8 ${
