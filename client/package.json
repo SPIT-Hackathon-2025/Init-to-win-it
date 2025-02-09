@@ -56,6 +56,7 @@
     "react-vis": "^1.12.1",
     "react-wordcloud": "^1.2.7",
     "recharts": "^2.15.1",
+    "rehype-raw": "^7.0.0",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
     "tailwind-scrollbar": "^4.0.0",

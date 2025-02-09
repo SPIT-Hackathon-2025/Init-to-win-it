@@ -36,8 +36,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
-
+CORS(app)  # Enable CORS for all routes
 
 # Initialize LangChain and Composio components
 llm = ChatOpenAI()
