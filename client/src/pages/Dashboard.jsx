@@ -16,7 +16,7 @@ const Dashboard = () => {
   const [tasksLoading, setTasksLoading] = useState(false);
 
   // Add API key constant (replace with your actual API key)
-  const API_KEY = import.meta.env.VITE_COMPOSIO_API_KEY;  // Add this line
+  const API_KEY = import.meta.env.VITE_maal _API_KEY;  // Add this line
 
   // // Add mockTasks definition
   const mockTasks = [

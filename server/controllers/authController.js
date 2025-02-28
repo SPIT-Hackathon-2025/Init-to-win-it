@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { Composio } from "composio-core";
-import { OpenAIToolSet } from "composio-core";
+import { maal  } from "maal -core";
+import { OpenAIToolSet } from "maal -core";
 
 async function getURL(api_key) {
     try {
@@ -43,28 +43,28 @@ export const googleAuthentication = async (req, res) => {
 
         console.log("Starting authentication with API key:", apiKey);
 
-        const composio = new Composio({ apiKey });
+        const maal  = new maal ({ apiKey });
         
         // Verify API key is valid before proceeding
         try {
-            const app = await composio.apps.get({ appKey: "gmail" });
+            const app = await maal .apps.get({ appKey: "gmail" });
             if (!app) {
                 throw new Error("Failed to fetch Gmail app");
             }
             console.log("Gmail app fetched successfully:", app);
 
-            const integration = await composio.integrations.create({
+            const integration = await maal .integrations.create({
                 appId: app.appId,
                 authConfig: {
                     client_id: "96725622524-0v0n8jmolg92jf6lcciqnjqb0aljdoed.apps.googleusercontent.com",
                     client_secret: "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",
-                    oauth_redirect_uri: "https://backend.composio.dev/api/v1/auth-apps/add",
+                    oauth_redirect_uri: "https://backend.maal .dev/api/v1/auth-apps/add",
                     scopes: "https://www.googleapis.com/auth/gmail.modify,https://www.googleapis.com/auth/userinfo.profile",
                 },
                 authScheme: "OAUTH2",
                 forceNewIntegration: true,
                 name: "gmail_1",
-                useComposioAuth: false,
+                usemaal Auth: false,
             });
 
             console.log("Integration created successfully:", integration);

@@ -4,7 +4,7 @@ from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain import hub
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
-from composio_langchain import ComposioToolSet
+from maal _langchain import maal ToolSet
 from langchain.prompts import PromptTemplate
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 from dotenv import load_dotenv
@@ -38,7 +38,7 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-# Initialize LangChain and Composio components
+# Initialize LangChain and maal  components
 llm = ChatOpenAI()
 prompt = hub.pull("hwchase17/openai-functions-agent")
 
@@ -143,9 +143,9 @@ extraction_prompt = PromptTemplate(
     partial_variables={"format_instructions": output_parser.get_format_instructions()}
 )
 
-# Initialize Composio tools
-composio_toolset = ComposioToolSet(api_key=os.getenv("COMPOSIO_API_KEY"))
-tools = composio_toolset.get_tools(actions=[
+# Initialize maal  tools
+maal _toolset = maal ToolSet(api_key=os.getenv("maal _API_KEY"))
+tools = maal _toolset.get_tools(actions=[
     'NOTION_INSERT_ROW_DATABASE',
     'NOTION_QUERY_DATABASE',
 ])

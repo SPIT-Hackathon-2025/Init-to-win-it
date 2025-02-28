@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain import hub
 from langchain_openai import ChatOpenAI
-from composio_langchain import ComposioToolSet
+from maal _langchain import maal ToolSet
 import os
 from dotenv import load_dotenv
 from flask_cors import CORS
@@ -30,7 +30,7 @@ def initialize_agent():
     llm = ChatOpenAI()
     prompt = hub.pull("hwchase17/openai-functions-agent")
     
-    your_toolset = ComposioToolSet(api_key=YOUR_API_KEY)
+    your_toolset = maal ToolSet(api_key=YOUR_API_KEY)
     
     gmail_tools = ['GMAIL_SEND_EMAIL', 'GMAIL_CREATE_EMAIL_DRAFT']
     google_docs_tools = [

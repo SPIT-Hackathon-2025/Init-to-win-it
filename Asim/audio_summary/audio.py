@@ -29,7 +29,7 @@ from flask.json.provider import DefaultJSONProvider
 from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain import hub
 from langchain_openai import ChatOpenAI
-from composio_langchain import ComposioToolSet
+from maal _langchain import maal ToolSet
 import os
 from datetime import datetime
 from flask_cors import CORS
@@ -423,8 +423,8 @@ def get_analysis(meet_id):
         logger.error(f"Error fetching analysis for meet_id {meet_id}: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-def initialize_composio_agent():
-    """Initialize the Composio agent with necessary tools"""
+def initialize_maal _agent():
+    """Initialize the maal  agent with necessary tools"""
     # Get OpenAI API key from environment
     openai_api_key = os.getenv('OPENAI_API_KEY')
     if not openai_api_key:
@@ -434,7 +434,7 @@ def initialize_composio_agent():
     llm = ChatOpenAI(api_key=openai_api_key)
     prompt = hub.pull("hwchase17/openai-functions-agent")
     
-    toolset = ComposioToolSet(api_key=os.getenv('COMPOSIO_API_KEY'))
+    toolset = maal ToolSet(api_key=os.getenv('maal _API_KEY'))
     
     # Define required tools
     doc_tools = [
@@ -498,8 +498,8 @@ def share_analysis(meet_id):
         if not participant_emails:
             return jsonify({'error': 'No participant emails found'}), 400
             
-        # Initialize Composio agent
-        executor = initialize_composio_agent()
+        # Initialize maal  agent
+        executor = initialize_maal _agent()
         
         # Format document content
         doc_content = format_analysis_for_doc(analysis)

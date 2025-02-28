@@ -7,10 +7,10 @@ services/email_deamon/token.pickle
 services/email_deamon/.venv
 Asim/meet/.env
 Asim/test.txt
-Asim/meet/.composio.lock
+Asim/meet/.maal .lock
 Asim/meet/credentials.json
 Asim/notion/.env
-Asim/notion/.composio.lock
+Asim/notion/.maal .lock
 Asim/notion/data.py
 Asim/notion/notion_mock_tasks.csv
 Asim/notion/analysis_results.json
@@ -21,6 +21,6 @@ audio/
 Asim/audio_summary/audio_server.log
 Asim/audio_summary/.env
 Asim/audio_summary/meeting_service.log
-Asim/audio_summary/.composio.lock
+Asim/audio_summary/.maal .lock
 Asim/reminder/node_modules/
 Asim/reminder/.env

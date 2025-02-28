@@ -11,7 +11,7 @@ const Details = () => {
 
     const handleSubmit = async (e) => {
 
-        localStorage.setItem('composio-api-key', apiKey);
+        localStorage.setItem('maal -api-key', apiKey);
         e.preventDefault();
         setIsLoading(true);
         setError('');
@@ -68,7 +68,7 @@ const Details = () => {
                         transition={{ delay: 0.2 }}
                         className="text-yellow-200/70 text-center"
                     >
-                        Connect your Composio API to get started
+                        Connect your maal  API to get started
                     </motion.p>
                 </div>
 
@@ -101,7 +101,7 @@ const Details = () => {
                     >
                         <div>
                             <label className="block text-yellow-200/70 mb-2" htmlFor="apiKey">
-                                Composio API Key
+                                maal  API Key
                             </label>
                             <input
                                 type="password"
@@ -112,7 +112,7 @@ const Details = () => {
                                 value={apiKey}
                                 onChange={(e) => setApiKey(e.target.value)}
                                 required
-                                placeholder="Enter your Composio API key"
+                                placeholder="Enter your maal  API key"
                             />
                         </div>
 
@@ -130,7 +130,7 @@ const Details = () => {
                         <p className="text-center mt-4 text-sm text-yellow-200/50">
                             Don't have an API key?{' '}
                             <a
-                                href="https://composio.dev"
+                                href="https://maal .dev"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-yellow-400 cursor-pointer hover:text-yellow-300 transition-colors"

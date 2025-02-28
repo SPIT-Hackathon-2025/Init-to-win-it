@@ -1368,9 +1368,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"composio-core@npm:latest":
+"maal -core@npm:latest":
   version: 0.5.7
-  resolution: "composio-core@npm:0.5.7"
+  resolution: "maal -core@npm:0.5.7"
   dependencies:
     "@hey-api/client-axios": "npm:^0.2.3"
     axios: "npm:^1.7.2"
@@ -1393,8 +1393,8 @@ __metadata:
     langchain: ^0.2.11
     openai: ^4.50.0
   bin:
-    composio: cli/index
-    composio-js: cli/index
+    maal : cli/index
+    maal -js: cli/index
   checksum: 10/6a54f6b2357de0c13a1a5c204fe79b00a3d08116a04aba119fd36c38dfd331584dea888ddb380d825ff1e18568fe941427ed559dbe83b9379a59164815d993c4
   languageName: node
   linkType: hard
@@ -3725,7 +3725,7 @@ __metadata:
     ai: "npm:^2.2.36"
     axios: "npm:^1.7.9"
     bcrypt: "npm:^5.1.1"
-    composio-core: "npm:latest"
+    maal -core: "npm:latest"
     cors: "npm:^2.8.5"
     dotenv: "npm:^16.4.7"
     express: "npm:^4.21.2"

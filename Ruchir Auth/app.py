@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from composio import Composio, ComposioToolSet # type: ignore
+from maal  import maal , maal ToolSet # type: ignore
 from flask_cors import CORS # type: ignore
 from dotenv import load_dotenv
 import os
@@ -7,7 +7,7 @@ from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain import hub
 from langchain_openai import ChatOpenAI
 from datetime import datetime
-from composio_langchain import ComposioToolSet, Action, App
+from maal _langchain import maal ToolSet, Action, App
 from datetime import datetime
 from dotenv import load_dotenv
 from pymongo import MongoClient
@@ -47,27 +47,27 @@ def api_auth():
         if not api_key:
             return jsonify({"error": "API key is required"}), 400
 
-        # Initialize Composio client
-        composio = Composio(api_key=api_key)
-        gmail_app = composio.apps.get(name="gmail")
+        # Initialize maal  client
+        maal  = maal (api_key=api_key)
+        gmail_app = maal .apps.get(name="gmail")
 
         # Create integration using environment variables
-        integration = composio.integrations.create(
+        integration = maal .integrations.create(
             app_id=gmail_app.appId,
             auth_config={
                 "client_id": os.getenv('GOOGLE_CLIENT_ID'),
                 "client_secret": os.getenv('GOOGLE_CLIENT_SECRET'),
-                "oauth_redirect_uri": "https://backend.composio.dev/api/v1/auth-apps/add",
+                "oauth_redirect_uri": "https://backend.maal .dev/api/v1/auth-apps/add",
                 "scopes": "https://www.googleapis.com/auth/gmail.modify,https://www.googleapis.com/auth/userinfo.profile"
             },
             auth_mode="OAUTH2",
             force_new_integration=True,
             name="gmail_1",
-            use_composio_auth=False
+            use_maal _auth=False
         )
 
         # Initialize toolset and get connection URL
-        toolset = ComposioToolSet(api_key=api_key)
+        toolset = maal ToolSet(api_key=api_key)
         connection_request = toolset.initiate_connection(
             integration_id=integration.id,
             entity_id="default"
@@ -94,8 +94,8 @@ def get_events():
         llm = ChatOpenAI()
         prompt = hub.pull("hwchase17/openai-functions-agent")
 
-        composio_toolset = ComposioToolSet(api_key=api_key)
-        tools = composio_toolset.get_tools(actions=['GOOGLECALENDAR_FIND_EVENT'])
+        maal _toolset = maal ToolSet(api_key=api_key)
+        tools = maal _toolset.get_tools(actions=['GOOGLECALENDAR_FIND_EVENT'])
 
         agent = create_openai_functions_agent(llm, tools, prompt)
         agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)

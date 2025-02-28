@@ -1,6 +1,6 @@
 from flask import Flask
 from apscheduler.schedulers.background import BackgroundScheduler
-from composio_langchain import ComposioToolSet
+from maal _langchain import maal ToolSet
 import os
 import json
 from datetime import datetime, timedelta
@@ -23,9 +23,9 @@ class MeetingMonitorService:
         with open('credentials.json') as f:
             self.credentials = json.load(f)
         
-        # Initialize Composio toolset
-        self.composio_toolset = ComposioToolSet(api_key=os.getenv("COMPOSIO_API_KEY"))
-        self.tools = self.composio_toolset.get_tools([
+        # Initialize maal  toolset
+        self.maal _toolset = maal ToolSet(api_key=os.getenv("maal _API_KEY"))
+        self.tools = self.maal _toolset.get_tools([
             'GOOGLEMEET_GET_MEET',
             'GOOGLEMEET_GET_RECORDINGS_BY_CONFERENCE_RECORD_ID',
             'GOOGLEMEET_GET_CONFERENCE_RECORD_FOR_MEET',
@@ -65,7 +65,7 @@ class MeetingMonitorService:
             current_time = datetime.now(pytz.UTC)
             
             # Fetch recent meetings
-            meetings = self.composio_toolset.execute_action(
+            meetings = self.maal _toolset.execute_action(
                 'GOOGLEMEET_GET_MEET',
                 parameters={
                     'timeMin': self.last_check_time.isoformat(),
@@ -87,7 +87,7 @@ class MeetingMonitorService:
         """Process a single meeting's transcript and send emails"""
         try:
             # Get conference record
-            conf_record = self.composio_toolset.execute_action(
+            conf_record = self.maal _toolset.execute_action(
                 'GOOGLEMEET_GET_CONFERENCE_RECORD_FOR_MEET',
                 parameters={'meetId': meet_id}
             )
@@ -97,7 +97,7 @@ class MeetingMonitorService:
                 return
 
             # Get recordings and transcript
-            recordings = self.composio_toolset.execute_action(
+            recordings = self.maal _toolset.execute_action(
                 'GOOGLEMEET_GET_RECORDINGS_BY_CONFERENCE_RECORD_ID',
                 parameters={'conferenceRecordId': conf_record['id']}
             )
@@ -123,7 +123,7 @@ class MeetingMonitorService:
     def get_meeting_participants(self, meet_id: str) -> list:
         """Get list of participant emails for a meeting"""
         try:
-            meeting_details = self.composio_toolset.execute_action(
+            meeting_details = self.maal _toolset.execute_action(
                 'GOOGLEMEET_GET_MEET',
                 parameters={'meetId': meet_id}
             )
@@ -138,7 +138,7 @@ class MeetingMonitorService:
             email_content = self.create_email_content(meet_id, transcript)
             
             for participant in participants:
-                self.composio_toolset.execute_action(
+                self.maal _toolset.execute_action(
                     'GMAIL_SEND_EMAIL',
                     parameters={
                         'to': participant,
@@ -184,4 +184,13 @@ if __name__ == '__main__':
     # Start the monitoring service
     monitor_service.start()
     # Run the Flask app
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5001)           # Extract transcript and participant information
+            transcript = recordings.get('transcript', 'Transcript not available')
+            participants = self.get_meeting_participants(meet_id)
+
+
+
+
+
+
+CSI NOT GIVING REPO ACCESSS
