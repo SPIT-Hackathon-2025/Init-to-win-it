@@ -1,0 +1,31 @@
+Mon, May 12, 2025 12:52:20 PM: Setting up environment and starting all servers
+Mon, May 12, 2025 12:52:20 PM: Using existing virtual environment at ./myenv
+Mon, May 12, 2025 12:52:20 PM: Environment check complete. Starting servers...
+Mon, May 12, 2025 12:52:20 PM: Searching for Flask servers
+Mon, May 12, 2025 12:52:22 PM: Starting Flask server: ./Asim/audio_summary/audio.py
+Mon, May 12, 2025 12:52:22 PM: Started Flask server audio.py (PID: 1777)
+Mon, May 12, 2025 12:52:24 PM: Starting Flask server: ./Asim/meet/test.py
+Mon, May 12, 2025 12:52:24 PM: Started Flask server test.py (PID: 1783)
+Mon, May 12, 2025 12:52:26 PM: Starting Flask server: ./Asim/meet/test1.py
+Mon, May 12, 2025 12:52:26 PM: Started Flask server test1.py (PID: 1789)
+Mon, May 12, 2025 12:52:28 PM: Starting Flask server: ./Asim/notion/notion.py
+Mon, May 12, 2025 12:52:28 PM: Started Flask server notion.py (PID: 1795)
+Mon, May 12, 2025 12:52:31 PM: Starting Flask server: ./rl_agent/model.py
+Mon, May 12, 2025 12:52:31 PM: Started Flask server model.py (PID: 1801)
+Mon, May 12, 2025 12:52:33 PM: Starting Flask server: ./Ruchir Auth/app.py
+Mon, May 12, 2025 12:52:33 PM: Started Flask server app.py (PID: 1807)
+Mon, May 12, 2025 12:52:35 PM: Starting Flask server: ./Ruchir Auth/server.py
+Mon, May 12, 2025 12:52:35 PM: Started Flask server server.py (PID: 1813)
+Mon, May 12, 2025 12:52:37 PM: Starting Flask server: ./vinayak/app.py
+Mon, May 12, 2025 12:52:37 PM: Started Flask server app.py (PID: 1819)
+Mon, May 12, 2025 12:52:39 PM: Starting client
+Mon, May 12, 2025 12:52:39 PM: Starting client in ./client
+Mon, May 12, 2025 12:52:39 PM: Started client (PID: 1824)
+Mon, May 12, 2025 12:52:39 PM: Starting Node.js server
+Mon, May 12, 2025 12:52:39 PM: Starting server in ./server
+Mon, May 12, 2025 12:52:40 PM: Started server (PID: 1834)
+Mon, May 12, 2025 12:52:41 PM: Starting additional Node.js server in ./Asim/reminder
+Mon, May 12, 2025 12:52:41 PM: Starting node-reminder in ./Asim/reminder
+Mon, May 12, 2025 12:52:41 PM: Started node-reminder (PID: 1847)
+Mon, May 12, 2025 12:52:42 PM: All servers started
+Mon, May 12, 2025 12:52:42 PM: Created stop_all_servers.sh

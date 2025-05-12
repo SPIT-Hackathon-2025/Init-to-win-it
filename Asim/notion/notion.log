@@ -1,0 +1,22 @@
+C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\langsmith\client.py:272: LangSmithMissingAPIKeyWarning: API key must be provided when using hosted LangSmith API
+  warnings.warn(
+Traceback (most recent call last):
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\Asim\notion\notion.py", line 46, in <module>
+    gemini = ChatGoogleGenerativeAI(
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\langchain_core\load\serializable.py", line 130, in __init__
+    super().__init__(*args, **kwargs)
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\pydantic\main.py", line 253, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\langchain_google_genai\chat_models.py", line 853, in validate_environment
+    self.client = genaix.build_generative_service(
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\langchain_google_genai\_genai_extension.py", line 276, in build_generative_service
+    return v1betaGenerativeServiceClient(**config)
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\client.py", line 667, in __init__
+    self._transport = transport_init(
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\transports\grpc.py", line 235, in __init__
+    super().__init__(
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\transports\base.py", line 100, in __init__
+    credentials, _ = google.auth.default(
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\google\auth\_default.py", line 685, in default
+    raise exceptions.DefaultCredentialsError(_CLOUD_SDK_MISSING_CREDENTIALS)
+google.auth.exceptions.DefaultCredentialsError: Your default credentials were not found. To set up Application Default Credentials, see https://cloud.google.com/docs/authentication/external/set-up-adc for more information.

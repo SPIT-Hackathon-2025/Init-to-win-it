@@ -1,0 +1,11 @@
+C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\pydub\utils.py:170: RuntimeWarning: Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work
+  warn("Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work", RuntimeWarning)
+Collection(Database(MongoClient(host=['localhost:27017'], document_class=dict, tz_aware=False, connect=True), 'SPIT_HACK'), 'meet_details')
+Traceback (most recent call last):
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\Asim\audio_summary\audio.py", line 85, in <module>
+    nlp = spacy.load('en_core_web_sm')
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\spacy\__init__.py", line 51, in load
+    return util.load_model(
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\myenv\lib\site-packages\spacy\util.py", line 472, in load_model
+    raise IOError(Errors.E050.format(name=name))
+OSError: [E050] Can't find model 'en_core_web_sm'. It doesn't seem to be a Python package or a valid path to a data directory.

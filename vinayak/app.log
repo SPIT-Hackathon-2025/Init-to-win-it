@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "C:\Users\vinay\OneDrive\Desktop\spit\Init-to-win-it\vinayak\app.py", line 15, in <module>
+    raise ValueError("GOOGLE_API_KEY environment variable is not set")
+ValueError: GOOGLE_API_KEY environment variable is not set
